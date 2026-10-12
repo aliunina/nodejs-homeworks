@@ -1,0 +1,30 @@
+{
+  "name": "nodejs-homeworks",
+  "version": "1.0.0",
+  "main": "index.js",
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.12.0",
+    "globals": "^17.13.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
+    "prettier": "^3.8.1"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --inspect index.js",
+    "build": "npm run lint && npm run prettier:check",
+    "lint": "eslint .",
+    "prettier:check": "prettier --check '**/*.{js,mjs,cjs}'",
+    "prepare": "husky",
+    "lint:fix": "eslint . --fix",
+    "prettier:fix": "prettier --write '**/*.{js,mjs,cjs}'"
+  },
+  "lint-staged": {
+    "*.{js,mjs,cjs}": "eslint --fix"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "winston": "^3.19.0"
+  }
+}
