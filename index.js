@@ -20,8 +20,8 @@ const server = http.createServer(function (req, res) {
                 'X-Powered-By': 'Node.js',
                 'Cache-Control':
                     'no-store, no-cache, must-revalidate, proxy-revalidate',
-                Connection: 'keep-alive',
-                Date: new Date().toUTCString(),
+                'Connection': 'keep-alive',
+                'Date-Time': new Date().toUTCString(),
             });
 
             res.end(JSON.stringify({ version }));
@@ -44,5 +44,5 @@ const server = http.createServer(function (req, res) {
 });
 
 server.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+    logger.info(`Server is running on port ${PORT}`);
 });
