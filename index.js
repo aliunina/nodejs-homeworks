@@ -21,7 +21,7 @@ const server = http.createServer(function (req, res) {
                 'Cache-Control':
                     'no-store, no-cache, must-revalidate, proxy-revalidate',
                 'Connection': 'keep-alive',
-                'Date-Time': new Date().toUTCString(),
+                'Date': new Date().toUTCString(),
             });
 
             res.end(JSON.stringify({ version }));
@@ -33,7 +33,10 @@ const server = http.createServer(function (req, res) {
             res.end(JSON.stringify({ error: 'Not Found' }));
         }
     } catch (err) {
-        logger.error(`Error handling request: ${err.message}`);
+        logger.error('Error handling request:', {
+            message: err.message,
+            stack: err.stack,
+        });
 
         res.writeHead(500, {
             'Content-Type': 'application/json',
