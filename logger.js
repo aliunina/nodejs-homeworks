@@ -11,8 +11,8 @@ const logger = createLogger({
             format: 'YYYY-MM-DD HH:mm:ss',
         }),
         format.printf(({ timestamp, level, message, stack }) => {
-            stack = stack || '';
-            return `${timestamp} [${level.toUpperCase()}] ${message} ${stack}`;
+            const stackStr = stack || '';
+            return `${timestamp} [${level.toUpperCase()}] ${message} ${stackStr}`;
         })
     ),
     transports: [
