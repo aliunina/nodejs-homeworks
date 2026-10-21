@@ -17,7 +17,7 @@ const logger = createLogger({
             const stackStr = stack || '';
             return `${timestamp} [${level.toUpperCase()}] ${
                 typeof message === 'object' ? JSON.stringify(message) : message
-            } \n ${stackStr}`;
+            } ${stackStr}`;
         })
     ),
     transports: [
