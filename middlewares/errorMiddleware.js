@@ -1,10 +1,7 @@
 import logger from '../utils/logger.js';
 
+// eslint-disable-next-line no-unused-vars
 const errorMiddleware = (err, req, res, next) => {
-    if (res.headersSent) {
-        return next(err);
-    }
-
     logger.error({
         message: err.message,
         status: err.statusCode || 500,
