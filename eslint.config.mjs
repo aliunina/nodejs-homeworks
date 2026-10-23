@@ -5,16 +5,13 @@ import tseslint from 'typescript-eslint';
 
 export default defineConfig([
     {
-        ignores: ['dist/**', 'scripts/register-typescript6.cjs'],
+        ignores: ['dist/**'],
     },
     {
         files: ['**/*.{js,mjs,cjs,ts}'],
         extends: [js.configs.recommended, tseslint.configs.recommended],
         languageOptions: {
             globals: globals.node,
-            parserOptions: {
-                warnOnUnsupportedTypeScriptVersion: false,
-            },
         },
         rules: {
             indent: ['error', 4],
