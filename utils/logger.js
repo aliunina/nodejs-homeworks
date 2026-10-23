@@ -1,7 +1,7 @@
-const { createLogger, format, transports } = require('winston');
-const path = require('path');
+import { createLogger, format, transports } from 'winston';
+import path from 'path';
 
-const logDirPath = path.join(__dirname, 'logs');
+const LOGS_DIR_PATH = path.join(process.cwd(), 'logs');
 
 const logger = createLogger({
     level: 'info',
@@ -10,27 +10,32 @@ const logger = createLogger({
         format.timestamp({
             format: 'YYYY-MM-DD HH:mm:ss',
         }),
+        format.errors({
+            stack: true,
+        }),
         format.printf(({ timestamp, level, message, stack }) => {
             const stackStr = stack || '';
-            return `${timestamp} [${level.toUpperCase()}] ${message} ${stackStr}`;
+            return `${timestamp} [${level.toUpperCase()}] ${
+                typeof message === 'object' ? JSON.stringify(message) : message
+            } ${stackStr}`;
         })
     ),
     transports: [
         new transports.Console(),
-        new transports.File({ filename: path.join(logDirPath, 'app.log') }),
+        new transports.File({ filename: path.join(LOGS_DIR_PATH, 'app.log') }),
     ],
     exceptionHandlers: [
         new transports.Console(),
         new transports.File({
-            filename: path.join(logDirPath, 'exceptions.log'),
+            filename: path.join(LOGS_DIR_PATH, 'exceptions.log'),
         }),
     ],
     rejectionHandlers: [
         new transports.Console(),
         new transports.File({
-            filename: path.join(logDirPath, 'rejections.log'),
+            filename: path.join(LOGS_DIR_PATH, 'rejections.log'),
         }),
     ],
 });
 
-module.exports = logger;
+export default logger;
