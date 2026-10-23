@@ -1,6 +1,11 @@
 import logger from '../utils/logger.js';
+import type { Request, Response, NextFunction } from 'express';
 
-const requestLoggerMiddleware = (req, res, next) => {
+const requestLoggerMiddleware = (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
     const start = Date.now();
 
     res.on('finish', () => {

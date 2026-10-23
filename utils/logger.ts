@@ -10,14 +10,13 @@ const logger = createLogger({
         format.timestamp({
             format: 'YYYY-MM-DD HH:mm:ss',
         }),
-        format.errors({
-            stack: true,
-        }),
         format.printf(({ timestamp, level, message, stack }) => {
-            const stackStr = stack || '';
-            return `${timestamp} [${level.toUpperCase()}] ${
-                typeof message === 'object' ? JSON.stringify(message) : message
-            } ${stackStr}`;
+            const stackStr = typeof stack === 'string' ? stack : '';
+            const timestampStr = typeof timestamp === 'string' ? timestamp : '';
+            const messageStr =
+                typeof message === 'string' ? message : JSON.stringify(message);
+
+            return `${timestampStr} [${level.toUpperCase()}] ${messageStr} ${stackStr}`;
         })
     ),
     transports: [

@@ -1,8 +1,8 @@
-import express from 'express';
+import express, { Router } from 'express';
 import userAuthMiddleware from '../middlewares/userAuthMiddleware.js';
 import * as userController from '../controllers/userController.js';
 
-const userRoute = express.Router();
+const userRoute: Router = express.Router();
 
 userRoute.post('/', userController.createUser);
 userRoute.get('/me', userAuthMiddleware, userController.getCurrentUser);

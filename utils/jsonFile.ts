@@ -3,7 +3,7 @@ import path from 'path';
 import { Readable } from 'stream';
 import { pipeline } from 'stream/promises';
 
-export async function readJsonFile(filePath) {
+export async function readJsonFile<T>(filePath: string): Promise<T[]> {
     try {
         const chunks = [];
         const readStream = fs.createReadStream(filePath, { encoding: 'utf8' });
@@ -15,20 +15,25 @@ export async function readJsonFile(filePath) {
         const content = chunks.join('').trim();
 
         if (!content) {
-            return [];
+            return [] as T[];
         }
 
-        return JSON.parse(content);
+        return JSON.parse(content) as T[];
     } catch (error) {
-        if (error.code === 'ENOENT') {
-            return [];
+        const err = error as NodeJS.ErrnoException;
+
+        if (err.code === 'ENOENT') {
+            return [] as T[];
         }
 
         throw error;
     }
 }
 
-export async function writeJsonFile(filePath, data) {
+export async function writeJsonFile<T>(
+    filePath: string,
+    data: T[]
+): Promise<void> {
     await fs.promises.mkdir(path.dirname(filePath), { recursive: true });
 
     await pipeline(

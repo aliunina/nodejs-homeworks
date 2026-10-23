@@ -1,8 +1,14 @@
 import * as healthService from '../services/healthService.js';
+import type { Request, Response, NextFunction } from 'express';
 
-export const readHealth = async (req, res, next) => {
+export const readHealth = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
     try {
         const appVersion = await healthService.getAppVersion();
+
         res.status(200)
             .set({
                 'X-Powered-By': 'Node.js',

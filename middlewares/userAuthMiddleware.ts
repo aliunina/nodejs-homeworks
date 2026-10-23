@@ -1,17 +1,34 @@
+import type { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import AppError from '../utils/AppError.js';
 
-const userAuthMiddleware = async (req, res, next) => {
+interface JwtPayload {
+    id: string;
+}
+
+const userAuthMiddleware = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
     try {
-        const { token } = req.cookies;
+        const token = req.cookies?.token;
+
         if (!token) {
             throw new AppError('Not authorized', 401);
         }
 
-        const tokenDecode = jwt.verify(token, process.env.JWT_SECRET);
-        if (tokenDecode.id) {
+        const secret = process.env.JWT_SECRET;
+
+        if (!secret) {
+            throw new AppError('JWT secret is not configured', 500);
+        }
+
+        const decodedToken = jwt.verify(token, secret) as JwtPayload;
+
+        if (decodedToken.id) {
             req.user = {
-                id: tokenDecode.id,
+                id: decodedToken.id,
             };
         } else {
             throw new AppError(
