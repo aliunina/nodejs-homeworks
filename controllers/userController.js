@@ -1,18 +1,14 @@
 import * as userService from '../services/userService.js';
 import * as postService from '../services/postService.js';
+import AppError from '../utils/AppError.js';
+import { toUserResponseDTO } from '../mappers/userMapper.js';
+import { toPostResponseDTO } from '../mappers/postMapper.js';
 
 export const createUser = async (req, res, next) => {
     try {
-        const user = await userService.create(req.body);
+        const user = await userService.createUser(req.body);
 
-        const responseBody = {
-            id: user.id,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            email: user.email,
-        };
-
-        res.status(201).json(responseBody);
+        res.status(201).json(toUserResponseDTO(user));
     } catch (error) {
         next(error);
     }
@@ -20,18 +16,15 @@ export const createUser = async (req, res, next) => {
 
 export const getCurrentUser = async (req, res, next) => {
     try {
-        const userId = req.user.id;
+        const userId = req.user?.id;
 
-        const user = await userService.findById(userId);
+        if (!userId) {
+            throw new AppError('Not authorized', 401);
+        }
 
-        const responseBody = {
-            id: user.id,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            email: user.email,
-        };
+        const user = await userService.findUserById(userId);
 
-        res.status(200).json(responseBody);
+        res.status(200).json(toUserResponseDTO(user));
     } catch (error) {
         next(error);
     }
@@ -39,18 +32,18 @@ export const getCurrentUser = async (req, res, next) => {
 
 export const updateCurrentUser = async (req, res, next) => {
     try {
-        const userId = req.user.id;
+        const userId = req.user?.id;
 
-        const updatedUser = await userService.update(userId, req.body);
+        if (!userId) {
+            throw new AppError('Not authorized', 401);
+        }
 
-        const responseBody = {
-            id: updatedUser.id,
-            firstName: updatedUser.firstName,
-            lastName: updatedUser.lastName,
-            email: updatedUser.email,
-        };
+        const updatedUser = await userService.updateUser(userId, {
+            firstName: req.body.firstName,
+            lastName: req.body.lastName,
+        });
 
-        res.status(200).json(responseBody);
+        res.status(200).json(toUserResponseDTO(updatedUser));
     } catch (error) {
         next(error);
     }
@@ -58,21 +51,18 @@ export const updateCurrentUser = async (req, res, next) => {
 
 export const getCurrentUserPosts = async (req, res, next) => {
     try {
-        const userId = req.user.id;
+        const userId = req.user?.id;
 
-        const user = await userService.findById(userId);
-        const posts = await postService.findAllByAuthorId(userId);
+        if (!userId) {
+            throw new AppError('Not authorized', 401);
+        }
 
-        const responseBody = posts.map((post) => {
-            return {
-                title: post.title,
-                description: post.title,
-                createdOn: post.createdOn,
-                authorName: user.firstName + ' ' + user.lastName,
-            };
-        });
+        const author = await userService.findUserById(userId);
+        const posts = await postService.findAllPostsByAuthorId(userId);
 
-        res.status(200).json(responseBody);
+        res.status(200).json(
+            posts.map((post) => toPostResponseDTO(post, author))
+        );
     } catch (error) {
         next(error);
     }

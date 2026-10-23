@@ -6,10 +6,8 @@ const POSTS_DATA_PATH = path.join(process.cwd(), 'data/posts.json');
 
 export async function findById(id) {
     const posts = await getAll();
-    const post = posts.find((post) => post.id === id) || null;
-    const result = post ? new Post(post) : null;
 
-    return result;
+    return posts.find((post) => post.id === id) ?? null;
 }
 
 export async function findAllByAuthorId(authorId) {
@@ -46,17 +44,22 @@ export async function updateById(id, updateData) {
         return null;
     }
 
-    const updatedPost = {
-        ...posts[index],
-        ...updateData,
-        id,
-    };
+    const current = posts[index].toJSON();
+    const definedUpdates = Object.fromEntries(
+        Object.entries(updateData).filter(([, value]) => value !== undefined)
+    );
+    const updatedPost = new Post({
+        ...current,
+        ...definedUpdates,
+        id: current.id,
+        authorId: current.authorId,
+    });
 
     posts[index] = updatedPost;
 
     await saveAll(posts);
 
-    return new Post(updatedPost);
+    return updatedPost;
 }
 
 export async function deleteById(id) {

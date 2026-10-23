@@ -6,18 +6,14 @@ const USERS_DATA_PATH = path.join(process.cwd(), 'data/users.json');
 
 export async function findByEmail(email) {
     const users = await getAll();
-    const user = users.find((user) => user.email === email) || null;
-    const result = user ? new User(user) : null;
 
-    return result;
+    return users.find((user) => user.email === email) ?? null;
 }
 
 export async function findById(id) {
     const users = await getAll();
-    const user = users.find((user) => user.id === id) || null;
-    const result = user ? new User(user) : null;
 
-    return result;
+    return users.find((user) => user.id === id) ?? null;
 }
 
 export async function getAll() {
@@ -47,15 +43,19 @@ export async function updateById(id, updateData) {
         return null;
     }
 
-    const updatedUser = {
-        ...users[index],
-        ...updateData,
-        id,
-    };
+    const current = users[index].toJSON();
+    const definedUpdates = Object.fromEntries(
+        Object.entries(updateData).filter(([, value]) => value !== undefined)
+    );
+    const updatedUser = new User({
+        ...current,
+        ...definedUpdates,
+        id: current.id,
+    });
 
     users[index] = updatedUser;
 
     await saveAll(users);
 
-    return new User(updatedUser);
+    return updatedUser;
 }

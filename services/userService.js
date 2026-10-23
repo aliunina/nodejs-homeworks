@@ -1,10 +1,9 @@
 import * as userRepository from '../repositories/userRepository.js';
 import User from '../models/User.js';
 import AppError from '../utils/AppError.js';
-import { getSanitizedPayload } from '../utils/util.js';
 import eventBus from '../events/eventBus.js';
 
-export async function create(userData) {
+export async function createUser(userData) {
     if (
         !userData.email ||
         !userData.password ||
@@ -14,25 +13,19 @@ export async function create(userData) {
         throw new AppError('Missing required fields', 400);
     }
 
-    const user = await userRepository.findByEmail(userData.email);
+    const existingUser = await userRepository.findByEmail(userData.email);
 
-    if (user) {
+    if (existingUser) {
         throw new AppError('User already exists', 409);
     }
 
-    const payload = getSanitizedPayload(userData, [
-        'email',
-        'password',
-        'firstName',
-        'lastName',
-    ]);
-    const newUser = await User.create(payload);
+    const newUser = await User.create(userData);
 
-    return await userRepository.save(newUser);
+    return userRepository.save(newUser);
 }
 
-export async function findById(id) {
-    const user = await userRepository.findById(id);
+export async function findUserById(userId) {
+    const user = await userRepository.findById(userId);
 
     if (!user) {
         throw new AppError('User not found', 404);
@@ -41,15 +34,12 @@ export async function findById(id) {
     return user;
 }
 
-export async function update(id, updateData) {
-    const user = await userRepository.findById(id);
+export async function updateUser(userId, updateData) {
+    const updatedUser = await userRepository.updateById(userId, updateData);
 
-    if (!user) {
+    if (!updatedUser) {
         throw new AppError('User not found', 404);
     }
-
-    const payload = getSanitizedPayload(updateData, ['firstName', 'lastName']);
-    const updatedUser = await userRepository.updateById(id, payload);
 
     eventBus.emit('userUpdated', updatedUser);
 
