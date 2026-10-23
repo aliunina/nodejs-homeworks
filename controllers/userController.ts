@@ -74,8 +74,8 @@ export const getCurrentUserPosts = async (
             throw new AppError('Not authorized', 401);
         }
 
-        const { posts, author } =
-            await postService.findAllPostsByAuthorId(userId);
+        const author = await userService.findUserById(userId);
+        const posts = await postService.findAllPostsByAuthorId(userId);
 
         res.status(200).json(
             posts.map((post) => toPostResponseDTO(post, author))

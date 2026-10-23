@@ -30,15 +30,7 @@ export async function createPost(
 }
 
 export async function findAllPostsByAuthorId(authorId: string) {
-    const user = await userRepository.findById(authorId);
-
-    if (!user) {
-        throw new AppError('User not found', 404);
-    }
-
-    const posts = await postRepository.findAllByAuthorId(authorId);
-
-    return { posts, author: user };
+    return postRepository.findAllByAuthorId(authorId);
 }
 
 export async function deletePost(postId: string, userId: string) {
