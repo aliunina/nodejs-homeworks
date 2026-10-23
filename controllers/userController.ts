@@ -1,10 +1,15 @@
 import * as userService from '../services/userService.js';
 import * as postService from '../services/postService.js';
+import type { Request, Response, NextFunction } from 'express';
 import AppError from '../utils/AppError.js';
 import { toUserResponseDTO } from '../mappers/userMapper.js';
 import { toPostResponseDTO } from '../mappers/postMapper.js';
 
-export const createUser = async (req, res, next) => {
+export const createUser = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
     try {
         const user = await userService.createUser(req.body);
 
@@ -14,7 +19,11 @@ export const createUser = async (req, res, next) => {
     }
 };
 
-export const getCurrentUser = async (req, res, next) => {
+export const getCurrentUser = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
     try {
         const userId = req.user?.id;
 
@@ -30,7 +39,11 @@ export const getCurrentUser = async (req, res, next) => {
     }
 };
 
-export const updateCurrentUser = async (req, res, next) => {
+export const updateCurrentUser = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
     try {
         const userId = req.user?.id;
 
@@ -49,7 +62,11 @@ export const updateCurrentUser = async (req, res, next) => {
     }
 };
 
-export const getCurrentUserPosts = async (req, res, next) => {
+export const getCurrentUserPosts = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
     try {
         const userId = req.user?.id;
 

@@ -1,7 +1,7 @@
-import express from 'express';
+import express, { Router } from 'express';
 import * as healthController from '../controllers/healthController.js';
 
-const healthRoute = express.Router();
+const healthRoute: Router = express.Router();
 
 healthRoute.get('/', healthController.readHealth);
 

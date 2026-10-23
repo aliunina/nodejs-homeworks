@@ -1,9 +1,14 @@
 import * as userRepository from '../repositories/userRepository.js';
-import User from '../models/User.js';
 import AppError from '../utils/AppError.js';
 import eventBus from '../events/eventBus.js';
+import User from '../models/User.js';
 
-export async function createUser(userData) {
+export async function createUser(userData: {
+    email: string;
+    password: string;
+    firstName: string;
+    lastName: string;
+}) {
     if (
         !userData.email ||
         !userData.password ||
@@ -24,7 +29,7 @@ export async function createUser(userData) {
     return userRepository.save(newUser);
 }
 
-export async function findUserById(userId) {
+export async function findUserById(userId: string) {
     const user = await userRepository.findById(userId);
 
     if (!user) {
@@ -34,7 +39,13 @@ export async function findUserById(userId) {
     return user;
 }
 
-export async function updateUser(userId, updateData) {
+export async function updateUser(
+    userId: string,
+    updateData: {
+        firstName?: string;
+        lastName?: string;
+    }
+) {
     const updatedUser = await userRepository.updateById(userId, updateData);
 
     if (!updatedUser) {

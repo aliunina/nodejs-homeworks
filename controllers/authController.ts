@@ -1,7 +1,12 @@
+import type { Request, Response, NextFunction } from 'express';
 import * as authService from '../services/authService.js';
 import { toUserResponseDTO } from '../mappers/userMapper.js';
 
-export const login = async (req, res, next) => {
+export const login = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
     try {
         const result = await authService.login(req.body);
 

@@ -2,7 +2,7 @@ import * as userRepository from '../repositories/userRepository.js';
 import AppError from '../utils/AppError.js';
 import jwt from 'jsonwebtoken';
 
-export async function login(loginData) {
+export async function login(loginData: { email: string; password: string }) {
     if (!loginData.email || !loginData.password) {
         throw new AppError('Missing required credentials', 400);
     }

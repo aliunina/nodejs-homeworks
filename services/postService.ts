@@ -3,7 +3,13 @@ import * as userRepository from '../repositories/userRepository.js';
 import Post from '../models/Post.js';
 import AppError from '../utils/AppError.js';
 
-export async function createPost(createData, userId) {
+export async function createPost(
+    createData: {
+        title: string;
+        description: string;
+    },
+    userId: string
+) {
     if (!createData.title || !createData.description || !userId) {
         throw new AppError('Missing required fields', 400);
     }
@@ -15,19 +21,19 @@ export async function createPost(createData, userId) {
     }
 
     const newPost = Post.create({
-        title: createData.title,
-        description: createData.description,
+        ...createData,
         authorId: userId,
     });
+    const savedPost = await postRepository.save(newPost);
 
-    return postRepository.save(newPost);
+    return savedPost;
 }
 
-export async function findAllPostsByAuthorId(authorId) {
+export async function findAllPostsByAuthorId(authorId: string) {
     return postRepository.findAllByAuthorId(authorId);
 }
 
-export async function deletePost(postId, userId) {
+export async function deletePost(postId: string, userId: string) {
     const post = await postRepository.findById(postId);
 
     if (!post) {
@@ -47,7 +53,14 @@ export async function deletePost(postId, userId) {
     return deletedPost;
 }
 
-export async function updatePost(postId, userId, updateData) {
+export async function updatePost(
+    postId: string,
+    userId: string,
+    updateData: {
+        title?: string;
+        description?: string;
+    }
+) {
     const post = await postRepository.findById(postId);
 
     if (!post) {
@@ -58,13 +71,16 @@ export async function updatePost(postId, userId, updateData) {
         throw new AppError('Post is not authored by the user', 403);
     }
 
-    const updatedPost = await postRepository.updateById(postId, {
-        title: updateData.title,
-        description: updateData.description,
-    });
+    const updatedPost = await postRepository.updateById(postId, updateData);
 
     if (!updatedPost) {
         throw new AppError('Post not found', 404);
+    }
+
+    const user = await userRepository.findById(userId);
+
+    if (!user) {
+        throw new AppError('User not found', 404);
     }
 
     return updatedPost;
