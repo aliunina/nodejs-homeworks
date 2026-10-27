@@ -4,11 +4,11 @@ const client = new MailtrapClient({
     token: process.env.MAILTRAP_TOKEN,
 });
 const sender = {
-    email: 'hello@demomailtrap.co',
-    name: 'Mailtrap Test',
+    email: process.env.MAIL_FROM_ADDRESS,
+    name: process.env.MAIL_FROM_NAME,
 };
 
-export async function sendUserUpdatedEmail(user) {
+export async function sendProfileUpdatedEmail(user) {
     await client.send({
         from: sender,
         to: [{ email: user.email }],

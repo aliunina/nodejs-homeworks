@@ -9,16 +9,17 @@ const userAuthMiddleware = async (req, res, next) => {
         }
 
         const tokenDecode = jwt.verify(token, process.env.JWT_SECRET);
-        if (tokenDecode.id) {
-            req.user = {
-                id: tokenDecode.id,
-            };
-        } else {
+        if (!tokenDecode.id) {
             throw new AppError(
                 'Wrong JWT Token, you need to log in again',
                 401
             );
         }
+
+        req.user = {
+            id: tokenDecode.id,
+        };
+
         next();
     } catch (error) {
         if (error instanceof jwt.JsonWebTokenError) {

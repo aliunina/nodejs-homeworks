@@ -34,6 +34,15 @@ export default class User {
             firstName: this.firstName,
             lastName: this.lastName,
             email: this.email,
+        };
+    }
+
+    toPersistence() {
+        return {
+            id: this.id,
+            firstName: this.firstName,
+            lastName: this.lastName,
+            email: this.email,
             password: this.password,
         };
     }

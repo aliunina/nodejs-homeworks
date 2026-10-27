@@ -2,7 +2,7 @@ import * as healthService from '../services/healthService.js';
 
 export const readHealth = async (req, res, next) => {
     try {
-        const appVersion = await healthService.getAppVersion();
+        const version = await healthService.getAppVersion();
         res.status(200)
             .set({
                 'X-Powered-By': 'Node.js',
@@ -11,8 +11,9 @@ export const readHealth = async (req, res, next) => {
                 Connection: 'keep-alive',
                 Date: new Date().toUTCString(),
             })
-            .type('json')
-            .send(appVersion);
+            .json({
+                version,
+            });
     } catch (error) {
         next(error);
     }

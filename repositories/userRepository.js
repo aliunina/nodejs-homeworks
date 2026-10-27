@@ -32,7 +32,10 @@ export async function save(user) {
 }
 
 export async function saveAll(users) {
-    await writeJsonFile(USERS_DATA_PATH, users);
+    await writeJsonFile(
+        USERS_DATA_PATH,
+        users.map((user) => user.toPersistence())
+    );
 }
 
 export async function updateById(id, updateData) {
@@ -43,7 +46,7 @@ export async function updateById(id, updateData) {
         return null;
     }
 
-    const current = users[index].toJSON();
+    const current = users[index].toPersistence();
     const definedUpdates = Object.fromEntries(
         Object.entries(updateData).filter(([, value]) => value !== undefined)
     );

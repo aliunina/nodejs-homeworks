@@ -3,20 +3,10 @@ import AppError from '../utils/AppError.js';
 import jwt from 'jsonwebtoken';
 
 export async function login(loginData) {
-    if (!loginData.email || !loginData.password) {
-        throw new AppError('Missing required credentials', 400);
-    }
-
     const user = await userRepository.findByEmail(loginData.email);
 
-    if (!user) {
-        throw new AppError('User not found', 404);
-    }
-
-    const isValidPassword = await user.comparePassword(loginData.password);
-
-    if (!isValidPassword) {
-        throw new AppError('Invalid credentials', 400);
+    if (!user || !(await user.comparePassword(loginData.password))) {
+        throw new AppError('Invalid credentials', 401);
     }
 
     const secret = process.env.JWT_SECRET;
@@ -26,7 +16,7 @@ export async function login(loginData) {
     }
 
     const jwtToken = jwt.sign({ id: user.id }, secret, {
-        expiresIn: '7d',
+        expiresIn: process.env.JWT_EXPIRES_IN || '7d',
     });
 
     return {

@@ -9,11 +9,18 @@ const errorMiddleware = (err, req, res, next) => {
         url: req.originalUrl,
         userId: req.user?.id || null,
         stack: err.stack,
+        errors: err.errors,
     });
 
-    res.status(err.statusCode || 500).json({
+    const responseJson = {
         message: err.message || 'Internal Server Error',
-    });
+    };
+
+    if (err.errors) {
+        responseJson.errors = err.errors;
+    }
+
+    res.status(err.statusCode || 500).json(responseJson);
 };
 
 export default errorMiddleware;

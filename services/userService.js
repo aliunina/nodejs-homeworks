@@ -4,15 +4,6 @@ import AppError from '../utils/AppError.js';
 import eventBus from '../events/eventBus.js';
 
 export async function createUser(userData) {
-    if (
-        !userData.email ||
-        !userData.password ||
-        !userData.firstName ||
-        !userData.lastName
-    ) {
-        throw new AppError('Missing required fields', 400);
-    }
-
     const existingUser = await userRepository.findByEmail(userData.email);
 
     if (existingUser) {
@@ -41,7 +32,7 @@ export async function updateUser(userId, updateData) {
         throw new AppError('User not found', 404);
     }
 
-    eventBus.emit('userUpdated', updatedUser);
+    eventBus.emit('profileUpdated', updatedUser);
 
     return updatedUser;
 }

@@ -2,6 +2,7 @@
   "name": "nodejs-homeworks",
   "version": "1.0.0",
   "main": "index.js",
+  "type": "module",
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "eslint": "^10.12.0",
@@ -32,6 +33,7 @@
     "jsonwebtoken": "^9.0.3",
     "mailtrap": "^5.0.0",
     "uuid": "^14.0.3",
-    "winston": "^3.19.0"
+    "winston": "^3.19.0",
+    "zod": "^4.6.7"
   }
 }
