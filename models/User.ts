@@ -47,13 +47,22 @@ export class User {
         return bcrypt.compare(plainPassword, this.password);
     }
 
-    toJSON(): UserProps {
+    toJSON(): Omit<UserProps, 'password'> {
         return {
             id: this.id,
             firstName: this.firstName,
             lastName: this.lastName,
             email: this.email,
-            password: this.password,
+        };
+    }
+
+    toPersistence(): UserProps {
+        return {
+            id: this.id,
+            firstName: this.firstName,
+            lastName: this.lastName,
+            email: this.email,
+            password: this.password
         };
     }
 }

@@ -26,16 +26,17 @@ const userAuthMiddleware = async (
 
         const decodedToken = jwt.verify(token, secret) as JwtPayload;
 
-        if (decodedToken.id) {
-            req.user = {
-                id: decodedToken.id,
-            };
-        } else {
+        if (!decodedToken.id) {
             throw new AppError(
                 'Wrong JWT Token, you need to log in again',
                 401
             );
         }
+
+        req.user = {
+            id: decodedToken.id,
+        };
+
         next();
     } catch (error) {
         if (error instanceof jwt.JsonWebTokenError) {

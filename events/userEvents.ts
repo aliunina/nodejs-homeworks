@@ -1,10 +1,10 @@
 import eventBus from './eventBus.js';
-import { sendUserUpdatedEmail } from '../services/emailService.js';
+import { sendProfileUpdatedEmail } from '../services/emailService.js';
 import logger from '../utils/logger.js';
 
-eventBus.on('userUpdated', async (updatedUser) => {
+eventBus.on('profileUpdated', async (updatedUser) => {
     try {
-        await sendUserUpdatedEmail(updatedUser);
+        await sendProfileUpdatedEmail(updatedUser);
 
         logger.info(`Email is sent to ${updatedUser.email}`);
     } catch (error) {

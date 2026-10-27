@@ -1,9 +1,6 @@
-import * as userService from '../services/userService.js';
-import * as postService from '../services/postService.js';
 import type { Request, Response, NextFunction } from 'express';
-import AppError from '../utils/AppError.js';
+import * as userService from '../services/userService.js';
 import { toUserResponseDTO } from '../mappers/userMapper.js';
-import { toPostResponseDTO } from '../mappers/postMapper.js';
 
 export const createUser = async (
     req: Request,
@@ -25,11 +22,7 @@ export const getCurrentUser = async (
     next: NextFunction
 ) => {
     try {
-        const userId = req.user?.id;
-
-        if (!userId) {
-            throw new AppError('Not authorized', 401);
-        }
+        const userId = req.user?.id as string;
 
         const user = await userService.findUserById(userId);
 
@@ -45,11 +38,7 @@ export const updateCurrentUser = async (
     next: NextFunction
 ) => {
     try {
-        const userId = req.user?.id;
-
-        if (!userId) {
-            throw new AppError('Not authorized', 401);
-        }
+        const userId = req.user?.id as string;
 
         const updatedUser = await userService.updateUser(userId, {
             firstName: req.body.firstName,
@@ -57,29 +46,6 @@ export const updateCurrentUser = async (
         });
 
         res.status(200).json(toUserResponseDTO(updatedUser));
-    } catch (error) {
-        next(error);
-    }
-};
-
-export const getCurrentUserPosts = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-) => {
-    try {
-        const userId = req.user?.id;
-
-        if (!userId) {
-            throw new AppError('Not authorized', 401);
-        }
-
-        const author = await userService.findUserById(userId);
-        const posts = await postService.findAllPostsByAuthorId(userId);
-
-        res.status(200).json(
-            posts.map((post) => toPostResponseDTO(post, author))
-        );
     } catch (error) {
         next(error);
     }

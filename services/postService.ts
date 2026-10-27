@@ -1,5 +1,4 @@
 import * as postRepository from '../repositories/postRepository.js';
-import * as userRepository from '../repositories/userRepository.js';
 import Post from '../models/Post.js';
 import AppError from '../utils/AppError.js';
 
@@ -10,16 +9,6 @@ export async function createPost(
     },
     userId: string
 ) {
-    if (!createData.title || !createData.description || !userId) {
-        throw new AppError('Missing required fields', 400);
-    }
-
-    const user = await userRepository.findById(userId);
-
-    if (!user) {
-        throw new AppError('User not found', 404);
-    }
-
     const newPost = Post.create({
         ...createData,
         authorId: userId,
@@ -44,13 +33,7 @@ export async function deletePost(postId: string, userId: string) {
         throw new AppError('Post is not authored by the user', 403);
     }
 
-    const deletedPost = await postRepository.deleteById(postId);
-
-    if (!deletedPost) {
-        throw new AppError('Post not found', 404);
-    }
-
-    return deletedPost;
+    return await postRepository.deleteById(postId);
 }
 
 export async function updatePost(
@@ -75,12 +58,6 @@ export async function updatePost(
 
     if (!updatedPost) {
         throw new AppError('Post not found', 404);
-    }
-
-    const user = await userRepository.findById(userId);
-
-    if (!user) {
-        throw new AppError('User not found', 404);
     }
 
     return updatedPost;

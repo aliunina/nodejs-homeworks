@@ -1,16 +1,16 @@
-import { MailtrapClient } from 'mailtrap';
+import { Address, MailtrapClient } from 'mailtrap';
 import User from '../models/User.js';
 
 const client = new MailtrapClient({
     token: process.env.MAILTRAP_TOKEN ?? '',
 });
 
-const sender = {
-    email: 'hello@demomailtrap.co',
-    name: 'Mailtrap Test',
+const sender: Address = {
+    email: process.env.MAIL_FROM_ADDRESS as string,
+    name: process.env.MAIL_FROM_NAME as string,
 };
 
-export async function sendUserUpdatedEmail(user: User) {
+export async function sendProfileUpdatedEmail(user: User) {
     await client.send({
         from: sender,
         to: [{ email: user.email }],

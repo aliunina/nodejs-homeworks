@@ -6,7 +6,6 @@ const LOGS_DIR_PATH = path.join(process.cwd(), 'logs');
 const logger = createLogger({
     level: 'info',
     format: format.combine(
-        format.errors({ stack: true }),
         format.timestamp({
             format: 'YYYY-MM-DD HH:mm:ss',
         }),
