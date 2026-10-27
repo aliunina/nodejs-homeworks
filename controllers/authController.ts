@@ -10,7 +10,9 @@ export const login = async (
 ) => {
     try {
         const result = await authService.login(req.body);
-        const tokenMaxAge = ms((process.env.JWT_EXPIRES_IN || '7d') as StringValue);
+        const tokenMaxAge = ms(
+            (process.env.JWT_EXPIRES_IN || '7d') as StringValue
+        );
 
         res.cookie('token', result.jwtToken, {
             httpOnly: true,

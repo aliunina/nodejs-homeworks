@@ -7,7 +7,7 @@ const errorMiddleware: ErrorRequestHandler = (err, req, res, next) => {
         return;
     }
 
-    const statusCode = err.statusCode as number || 500;
+    const statusCode = (err.statusCode as number) || 500;
 
     logger.error({
         message: err.message,

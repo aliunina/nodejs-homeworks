@@ -1,16 +1,11 @@
 import * as postRepository from '../repositories/postRepository.js';
 import Post from '../models/Post.js';
 import AppError from '../utils/AppError.js';
+import { CreatePostInput, UpdatePostInput } from '../schemas/postSchema.js';
 
-export async function createPost(
-    createData: {
-        title: string;
-        description: string;
-    },
-    userId: string
-) {
+export async function createPost(createInput: CreatePostInput, userId: string) {
     const newPost = Post.create({
-        ...createData,
+        ...createInput,
         authorId: userId,
     });
     const savedPost = await postRepository.save(newPost);
@@ -39,10 +34,7 @@ export async function deletePost(postId: string, userId: string) {
 export async function updatePost(
     postId: string,
     userId: string,
-    updateData: {
-        title?: string;
-        description?: string;
-    }
+    updateInput: UpdatePostInput
 ) {
     const post = await postRepository.findById(postId);
 
@@ -54,7 +46,7 @@ export async function updatePost(
         throw new AppError('Post is not authored by the user', 403);
     }
 
-    const updatedPost = await postRepository.updateById(postId, updateData);
+    const updatedPost = await postRepository.updateById(postId, updateInput);
 
     if (!updatedPost) {
         throw new AppError('Post not found', 404);

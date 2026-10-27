@@ -1,11 +1,12 @@
 import * as userRepository from '../repositories/userRepository.js';
+import { LoginInput } from '../schemas/authSchema.js';
 import AppError from '../utils/AppError.js';
 import jwt, { type SignOptions } from 'jsonwebtoken';
 
-export async function login(loginData: { email: string; password: string }) {
-    const user = await userRepository.findByEmail(loginData.email);
+export async function login(loginInput: LoginInput) {
+    const user = await userRepository.findByEmail(loginInput.email);
 
-    if (!user || !(await user.comparePassword(loginData.password))) {
+    if (!user || !(await user.comparePassword(loginInput.password))) {
         throw new AppError('Invalid credentials', 401);
     }
 

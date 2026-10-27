@@ -28,7 +28,7 @@ export const updatePost = async (
     try {
         const userId = req.user?.id as string;
         const postId = req.params.id as string;
-        
+
         const post = await postService.updatePost(postId, userId, req.body);
         const user = await userService.findUserById(userId);
 

@@ -1,6 +1,10 @@
-import type { Request, Response, NextFunction } from 'express';
+import type { NextFunction, Request, Response } from 'express';
 import * as userService from '../services/userService.js';
 import { toUserResponseDTO } from '../mappers/userMapper.js';
+import type {
+    CreateUserInput,
+    UpdateUserInput,
+} from '../schemas/userSchema.js';
 
 export const createUser = async (
     req: Request,
@@ -8,7 +12,7 @@ export const createUser = async (
     next: NextFunction
 ) => {
     try {
-        const user = await userService.createUser(req.body);
+        const user = await userService.createUser(req.body as CreateUserInput);
 
         res.status(201).json(toUserResponseDTO(user));
     } catch (error) {
@@ -40,10 +44,10 @@ export const updateCurrentUser = async (
     try {
         const userId = req.user?.id as string;
 
-        const updatedUser = await userService.updateUser(userId, {
-            firstName: req.body.firstName,
-            lastName: req.body.lastName,
-        });
+        const updatedUser = await userService.updateUser(
+            userId,
+            req.body as UpdateUserInput
+        );
 
         res.status(200).json(toUserResponseDTO(updatedUser));
     } catch (error) {
