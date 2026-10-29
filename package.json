@@ -1,29 +1,38 @@
 {
   "name": "nodejs-homeworks",
   "version": "1.0.0",
-  "main": "index.js",
   "type": "module",
+  "main": "dist/index.js",
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@types/bcrypt": "^6.0.0",
+    "@types/cookie-parser": "^1.4.10",
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^26.6.5",
     "eslint": "^10.12.0",
     "globals": "^17.13.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",
-    "prettier": "^3.8.1"
+    "prettier": "^3.8.1",
+    "tsx": "^4.23.15",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.72.0"
   },
   "scripts": {
-    "start": "node index.js",
-    "dev": "node --inspect index.js",
-    "build": "npm run lint && npm run prettier:check",
+    "start": "node dist/index.js",
+    "dev": "tsx --inspect index.ts",
+    "build": "tsc && npm run lint && npm run prettier:check",
+    "typecheck": "tsc --noEmit",
     "lint": "eslint .",
-    "prettier:check": "prettier --check '**/*.{js,mjs,cjs}'",
+    "prettier:check": "prettier --check \"**/*.ts\"",
     "prepare": "husky",
     "lint:fix": "eslint . --fix",
-    "prettier:fix": "prettier --write '**/*.{js,mjs,cjs}'",
-    "backup": "node scripts/usersBackup.js"
+    "prettier:fix": "prettier --write \"**/*.ts\"",
+    "backup": "tsx scripts/usersBackup.ts"
   },
   "lint-staged": {
-    "*.{js,mjs,cjs}": "eslint --fix"
+    "*.ts": "eslint --fix"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
