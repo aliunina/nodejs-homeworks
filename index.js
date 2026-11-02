@@ -1,51 +1,33 @@
-require('dotenv').config();
+import 'dotenv/config';
+import express from 'express';
+import cookieParser from 'cookie-parser';
+import logger from './utils/logger.js';
 
-const http = require('http');
-const fs = require('fs');
-const path = require('path');
-const logger = require('./logger');
+import requestLoggerMiddleware from './middlewares/requestLoggerMiddleware.js';
+import errorMiddleware from './middlewares/errorMiddleware.js';
+
+import authRoute from './routes/authRoute.js';
+import userRoute from './routes/userRoute.js';
+import postRoute from './routes/postRoute.js';
+import healthRoute from './routes/healthRoute.js';
+
+import './events/userEvents.js';
 
 const PORT = process.env.PORT || 3000;
+const app = express();
 
-const packageJsonPath = path.join(__dirname, 'package.json');
-const { version } = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+app.use(express.json());
+app.use(cookieParser());
 
-const server = http.createServer(function (req, res) {
-    logger.info(`Incoming request: ${req.method} ${req.url}`);
+app.use(requestLoggerMiddleware);
 
-    try {
-        if (req.method === 'GET' && req.url === '/health') {
-            res.writeHead(200, {
-                'Content-Type': 'application/json',
-                'X-Powered-By': 'Node.js',
-                'Cache-Control':
-                    'no-store, no-cache, must-revalidate, proxy-revalidate',
-                'Connection': 'keep-alive',
-                'Date': new Date().toUTCString(),
-            });
+app.use('/api/v1/auth', authRoute);
+app.use('/api/v1/users', userRoute);
+app.use('/api/v1/posts', postRoute);
+app.use('/health', healthRoute);
 
-            res.end(JSON.stringify({ version }));
-        } else {
-            res.writeHead(404, {
-                'Content-Type': 'application/json',
-            });
+app.use(errorMiddleware);
 
-            res.end(JSON.stringify({ error: 'Not Found' }));
-        }
-    } catch (err) {
-        logger.error('Error handling request:', {
-            message: err.message,
-            stack: err.stack,
-        });
-
-        res.writeHead(500, {
-            'Content-Type': 'application/json',
-        });
-
-        res.end(JSON.stringify({ error: 'Internal Server Error' }));
-    }
-});
-
-server.listen(PORT, () => {
-    logger.info(`Server is running on port ${PORT}`);
+app.listen(PORT, () => {
+    logger.info(`Server is running on http://localhost:${PORT}`);
 });
