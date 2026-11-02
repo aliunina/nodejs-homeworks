@@ -2,12 +2,8 @@ import type { ErrorRequestHandler } from 'express';
 import logger from '../utils/logger.js';
 import AppError from '../utils/AppError.js';
 
+// eslint-disable-next-line no-unused-vars
 const errorMiddleware: ErrorRequestHandler = (err, req, res, next) => {
-    if (res.headersSent) {
-        next(err);
-        return;
-    }
-
     const statusCode = err instanceof AppError ? err.statusCode : 500;
     const message =
         err instanceof Error ? err.message : 'Internal Server Error';
