@@ -1,0 +1,86 @@
+import type { Response, NextFunction } from 'express';
+import type { AuthenticatedRequest } from '../types/express.js';
+import * as postService from '../services/postService.js';
+import * as userService from '../services/userService.js';
+import { toPostResponseDTO } from '../mappers/postMapper.js';
+import type {
+    CreatePostInput,
+    UpdatePostInput,
+} from '../schemas/postSchema.js';
+
+export const createPost = async (
+    req: AuthenticatedRequest<CreatePostInput>,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const userId = req.user.id;
+
+        const [user, post] = await Promise.all([
+            userService.findUserById(userId),
+            postService.createPost(req.body, userId),
+        ]);
+
+        res.status(201).json(toPostResponseDTO(post, user));
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const updatePost = async (
+    req: AuthenticatedRequest<UpdatePostInput, { id: string }>,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const userId = req.user.id;
+        const postId = req.params.id;
+
+        const [user, post] = await Promise.all([
+            userService.findUserById(userId),
+            postService.updatePost(postId, userId, req.body),
+        ]);
+
+        res.status(200).json(toPostResponseDTO(post, user));
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const deletePost = async (
+    req: AuthenticatedRequest<{}, { id: string }>,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const userId = req.user.id;
+        const postId = req.params.id;
+
+        await postService.deletePost(postId, userId);
+
+        res.status(200).json({ message: 'Post has been successfully deleted' });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const getCurrentUserPosts = async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const userId = req.user.id;
+
+        const [author, posts] = await Promise.all([
+            userService.findUserById(userId),
+            postService.findAllPostsByAuthorId(userId),
+        ]);
+
+        res.status(200).json(
+            posts.map((post) => toPostResponseDTO(post, author))
+        );
+    } catch (error) {
+        next(error);
+    }
+};
