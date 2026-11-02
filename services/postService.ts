@@ -1,7 +1,10 @@
 import * as postRepository from '../repositories/postRepository.js';
 import Post from '../models/Post.js';
 import AppError from '../utils/AppError.js';
-import { CreatePostInput, UpdatePostInput } from '../schemas/postSchema.js';
+import type {
+    CreatePostInput,
+    UpdatePostInput,
+} from '../schemas/postSchema.js';
 
 export async function createPost(createInput: CreatePostInput, userId: string) {
     const newPost = Post.create({

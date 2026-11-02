@@ -1,5 +1,5 @@
 import * as userRepository from '../repositories/userRepository.js';
-import { LoginInput } from '../schemas/authSchema.js';
+import type { LoginInput } from '../schemas/authSchema.js';
 import AppError from '../utils/AppError.js';
 import jwt, { type SignOptions } from 'jsonwebtoken';
 

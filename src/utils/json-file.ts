@@ -15,15 +15,17 @@ export async function readJsonFile<T>(filePath: string): Promise<T[]> {
         const content = chunks.join('').trim();
 
         if (!content) {
-            return [] as T[];
+            return [];
         }
 
         return JSON.parse(content) as T[];
     } catch (error) {
-        const err = error as NodeJS.ErrnoException;
-
-        if (err.code === 'ENOENT') {
-            return [] as T[];
+        if (
+            error instanceof Error &&
+            'code' in error &&
+            error.code === 'ENOENT'
+        ) {
+            return [];
         }
 
         throw error;

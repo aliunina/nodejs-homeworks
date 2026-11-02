@@ -1,30 +1,28 @@
 import type { ErrorRequestHandler } from 'express';
-import logger from '../src/utils/logger.js';
+import logger from '../utils/logger.js';
+import AppError from '../utils/AppError.js';
 
+// eslint-disable-next-line no-unused-vars
 const errorMiddleware: ErrorRequestHandler = (err, req, res, next) => {
-    if (res.headersSent) {
-        next(err);
-        return;
-    }
-
-    const statusCode = (err.statusCode as number) || 500;
+    const statusCode = err instanceof AppError ? err.statusCode : 500;
+    const message =
+        err instanceof Error ? err.message : 'Internal Server Error';
+    const errors = err instanceof AppError ? err.errors : undefined;
 
     logger.error({
-        message: err.message,
+        message,
         status: statusCode,
         method: req.method,
         url: req.originalUrl,
         userId: req.user?.id || null,
-        stack: err.stack,
-        errors: err.errors,
+        stack: err instanceof Error ? err.stack : undefined,
+        errors,
     });
 
-    const responseJson = {
-        message: err.message || 'Internal Server Error',
-        ...(err.errors && { errors: err.errors }),
-    };
-
-    res.status(err.statusCode || 500).json(responseJson);
+    res.status(statusCode).json({
+        message: message || 'Internal Server Error',
+        ...(errors && { errors }),
+    });
 };
 
 export default errorMiddleware;

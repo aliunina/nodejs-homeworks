@@ -1,5 +1,5 @@
 import type { NextFunction, Request, Response } from 'express';
-import type { ZodType } from 'zod';
+import { z, type ZodType } from 'zod';
 import AppError from '../utils/AppError.js';
 
 export default function validate<T>(schema: ZodType<T>) {
@@ -7,13 +7,16 @@ export default function validate<T>(schema: ZodType<T>) {
         const result = schema.safeParse(req.body);
 
         if (!result.success) {
-            const errors: Record<string, string> = {};
+            const { formErrors, fieldErrors } = z.flattenError(result.error);
+            const hasFieldErrors = Object.values(fieldErrors).some(Boolean);
 
-            result.error.issues.forEach((issue) => {
-                errors[issue.path[0] as string] = issue.message;
-            });
-
-            return next(new AppError('Validation failed', 400, errors));
+            return next(
+                new AppError(
+                    formErrors[0] ?? 'Validation failed',
+                    400,
+                    hasFieldErrors ? fieldErrors : undefined
+                )
+            );
         }
 
         req.body = result.data;
