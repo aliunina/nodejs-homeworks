@@ -1,6 +1,7 @@
 import path from 'path';
 import { User, UserProps } from '../models/User.js';
 import { readJsonFile, writeJsonFile } from '../utils/jsonFile.js';
+import type { UpdateUserInput } from '../schemas/userSchema.js';
 
 const USERS_DATA_PATH = path.join(process.cwd(), 'data/users.json');
 
@@ -38,7 +39,7 @@ export async function saveAll(users: User[]) {
     );
 }
 
-export async function updateById(id: string, updateData: Partial<UserProps>) {
+export async function updateById(id: string, updateData: UpdateUserInput) {
     const users = await getAll();
     const index = users.findIndex((user) => user.id === id);
 
@@ -47,12 +48,9 @@ export async function updateById(id: string, updateData: Partial<UserProps>) {
     }
 
     const current = users[index].toPersistence();
-    const definedUpdates = Object.fromEntries(
-        Object.entries(updateData).filter(([, value]) => value !== undefined)
-    );
     const updatedUser = new User({
         ...current,
-        ...definedUpdates,
+        ...updateData,
         id: current.id,
     });
 

@@ -1,18 +1,25 @@
-import type { Request, Response, NextFunction } from 'express';
+import type { Response, NextFunction } from 'express';
+import type { AuthenticatedRequest } from '../types/express.js';
 import * as postService from '../services/postService.js';
 import * as userService from '../services/userService.js';
 import { toPostResponseDTO } from '../mappers/postMapper.js';
+import type {
+    CreatePostInput,
+    UpdatePostInput,
+} from '../schemas/postSchema.js';
 
 export const createPost = async (
-    req: Request,
+    req: AuthenticatedRequest<CreatePostInput>,
     res: Response,
     next: NextFunction
 ) => {
     try {
-        const userId = req.user?.id as string;
+        const userId = req.user.id;
 
-        const user = await userService.findUserById(userId);
-        const post = await postService.createPost(req.body, userId);
+        const [user, post] = await Promise.all([
+            userService.findUserById(userId),
+            postService.createPost(req.body, userId),
+        ]);
 
         res.status(201).json(toPostResponseDTO(post, user));
     } catch (error) {
@@ -21,16 +28,18 @@ export const createPost = async (
 };
 
 export const updatePost = async (
-    req: Request,
+    req: AuthenticatedRequest<UpdatePostInput, { id: string }>,
     res: Response,
     next: NextFunction
 ) => {
     try {
-        const userId = req.user?.id as string;
-        const postId = req.params.id as string;
+        const userId = req.user.id;
+        const postId = req.params.id;
 
-        const post = await postService.updatePost(postId, userId, req.body);
-        const user = await userService.findUserById(userId);
+        const [user, post] = await Promise.all([
+            userService.findUserById(userId),
+            postService.updatePost(postId, userId, req.body),
+        ]);
 
         res.status(200).json(toPostResponseDTO(post, user));
     } catch (error) {
@@ -39,13 +48,13 @@ export const updatePost = async (
 };
 
 export const deletePost = async (
-    req: Request,
+    req: AuthenticatedRequest<{}, { id: string }>,
     res: Response,
     next: NextFunction
 ) => {
     try {
-        const userId = req.user?.id as string;
-        const postId = req.params.id as string;
+        const userId = req.user.id;
+        const postId = req.params.id;
 
         await postService.deletePost(postId, userId);
 
@@ -56,15 +65,17 @@ export const deletePost = async (
 };
 
 export const getCurrentUserPosts = async (
-    req: Request,
+    req: AuthenticatedRequest,
     res: Response,
     next: NextFunction
 ) => {
     try {
-        const userId = req.user?.id as string;
+        const userId = req.user.id;
 
-        const author = await userService.findUserById(userId);
-        const posts = await postService.findAllPostsByAuthorId(userId);
+        const [author, posts] = await Promise.all([
+            userService.findUserById(userId),
+            postService.findAllPostsByAuthorId(userId),
+        ]);
 
         res.status(200).json(
             posts.map((post) => toPostResponseDTO(post, author))
