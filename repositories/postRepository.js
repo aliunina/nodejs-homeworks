@@ -45,12 +45,9 @@ export async function updateById(id, updateData) {
     }
 
     const current = posts[index].toJSON();
-    const definedUpdates = Object.fromEntries(
-        Object.entries(updateData).filter(([, value]) => value !== undefined)
-    );
     const updatedPost = new Post({
         ...current,
-        ...definedUpdates,
+        ...updateData,
         id: current.id,
         authorId: current.authorId,
     });

@@ -1,26 +1,27 @@
+import AppError from '../utils/AppError.js';
 import logger from '../utils/logger.js';
 
 // eslint-disable-next-line no-unused-vars
 const errorMiddleware = (err, req, res, next) => {
+    const statusCode = err instanceof AppError ? err.statusCode : 500;
+    const message =
+        err instanceof Error ? err.message : 'Internal Server Error';
+    const errors = err instanceof AppError ? err.errors : undefined;
+
     logger.error({
-        message: err.message,
-        status: err.statusCode || 500,
+        message,
+        status: statusCode || 500,
         method: req.method,
         url: req.originalUrl,
         userId: req.user?.id || null,
-        stack: err.stack,
-        errors: err.errors,
+        stack: err instanceof Error ? err.stack : undefined,
+        errors,
     });
 
-    const responseJson = {
-        message: err.message || 'Internal Server Error',
-    };
-
-    if (err.errors) {
-        responseJson.errors = err.errors;
-    }
-
-    res.status(err.statusCode || 500).json(responseJson);
+    res.status(statusCode).json({
+        message: message || 'Internal Server Error',
+        ...(errors && { errors }),
+    });
 };
 
 export default errorMiddleware;

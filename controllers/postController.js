@@ -6,8 +6,10 @@ export const createPost = async (req, res, next) => {
     try {
         const userId = req.user?.id;
 
-        const user = await userService.findUserById(userId);
-        const post = await postService.createPost(req.body, userId);
+        const [user, post] = await Promise.all([
+            userService.findUserById(userId),
+            postService.createPost(req.body, userId),
+        ]);
 
         res.status(201).json(toPostResponseDTO(post, user));
     } catch (error) {
@@ -18,10 +20,12 @@ export const createPost = async (req, res, next) => {
 export const updatePost = async (req, res, next) => {
     try {
         const userId = req.user?.id;
-
         const postId = req.params.id;
-        const post = await postService.updatePost(postId, userId, req.body);
-        const user = await userService.findUserById(userId);
+
+        const [user, post] = await Promise.all([
+            userService.findUserById(userId),
+            postService.updatePost(postId, userId, req.body),
+        ]);
 
         res.status(200).json(toPostResponseDTO(post, user));
     } catch (error) {
@@ -46,8 +50,10 @@ export const getCurrentUserPosts = async (req, res, next) => {
     try {
         const userId = req.user?.id;
 
-        const author = await userService.findUserById(userId);
-        const posts = await postService.findAllPostsByAuthorId(userId);
+        const [author, posts] = await Promise.all([
+            userService.findUserById(userId),
+            postService.findAllPostsByAuthorId(userId),
+        ]);
 
         res.status(200).json(
             posts.map((post) => toPostResponseDTO(post, author))

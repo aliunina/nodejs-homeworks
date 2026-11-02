@@ -7,7 +7,11 @@ export const createUserSchema = z.object({
     lastName: z.string().trim().min(1).max(50),
 });
 
-export const updateUserSchema = z.object({
-    firstName: z.string().trim().min(1).max(50).optional(),
-    lastName: z.string().trim().min(1).max(50).optional(),
-});
+export const updateUserSchema = z
+    .object({
+        firstName: z.string().trim().min(1).max(50).optional(),
+        lastName: z.string().trim().min(1).max(50).optional(),
+    })
+    .refine((params) => params.firstName ?? params.lastName, {
+        message: 'Request body can not be empty',
+    });

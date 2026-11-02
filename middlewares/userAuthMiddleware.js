@@ -8,8 +8,14 @@ const userAuthMiddleware = async (req, res, next) => {
             throw new AppError('Not authorized', 401);
         }
 
-        const tokenDecode = jwt.verify(token, process.env.JWT_SECRET);
-        if (!tokenDecode.id) {
+        const secret = process.env.JWT_SECRET;
+
+        if (!secret) {
+            throw new AppError('JWT secret is not configured', 500);
+        }
+
+        const decodedToken = jwt.verify(token, secret);
+        if (!decodedToken.id) {
             throw new AppError(
                 'Wrong JWT Token, you need to log in again',
                 401
@@ -17,7 +23,7 @@ const userAuthMiddleware = async (req, res, next) => {
         }
 
         req.user = {
-            id: tokenDecode.id,
+            id: decodedToken.id,
         };
 
         next();

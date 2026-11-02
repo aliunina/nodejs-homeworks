@@ -1,3 +1,4 @@
+import z from 'zod';
 import AppError from '../utils/AppError.js';
 
 export default function validate(schema) {
@@ -5,13 +6,16 @@ export default function validate(schema) {
         const result = schema.safeParse(req.body);
 
         if (!result.success) {
-            const errors = {};
+            const { formErrors, fieldErrors } = z.flattenError(result.error);
+            const hasFieldErrors = Object.values(fieldErrors).some(Boolean);
 
-            result.error.issues.forEach((issue) => {
-                errors[issue.path[0]] = issue.message;
-            });
-
-            return next(new AppError('Validation failed', 400, errors));
+            return next(
+                new AppError(
+                    formErrors[0] ?? 'Validation failed',
+                    400,
+                    hasFieldErrors ? fieldErrors : undefined
+                )
+            );
         }
 
         req.body = result.data;

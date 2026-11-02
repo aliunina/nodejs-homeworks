@@ -47,12 +47,9 @@ export async function updateById(id, updateData) {
     }
 
     const current = users[index].toPersistence();
-    const definedUpdates = Object.fromEntries(
-        Object.entries(updateData).filter(([, value]) => value !== undefined)
-    );
     const updatedUser = new User({
         ...current,
-        ...definedUpdates,
+        ...updateData,
         id: current.id,
     });
 
