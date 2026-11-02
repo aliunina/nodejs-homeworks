@@ -1,5 +1,5 @@
 import type { ErrorRequestHandler } from 'express';
-import logger from '../utils/logger.js';
+import logger from '../src/utils/logger.js';
 
 const errorMiddleware: ErrorRequestHandler = (err, req, res, next) => {
     if (res.headersSent) {

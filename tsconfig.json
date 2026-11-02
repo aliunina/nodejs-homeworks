@@ -16,7 +16,9 @@
         "experimentalDecorators": true,
         "sourceMap": true,
         "incremental": true,
-        "forceConsistentCasingInFileNames": true
+        "forceConsistentCasingInFileNames": true,
+        "types": ["node"],
+        "strictPropertyInitialization": false
     },
     "include": ["src/**/*.ts", "src/**/*.d.ts"],
     "exclude": ["node_modules", "dist"]
