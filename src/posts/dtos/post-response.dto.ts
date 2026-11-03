@@ -7,6 +7,7 @@ export class PostResponseDto {
     description: string;
     createdOn: Date;
     authorName: string;
+    likesCount: number;
 }
 
 export function toPostResponseDTO(post: Post, author: User): PostResponseDto {
@@ -16,5 +17,6 @@ export function toPostResponseDTO(post: Post, author: User): PostResponseDto {
         description: post.description,
         createdOn: post.createdOn,
         authorName: `${author.firstName} ${author.lastName}`,
+        likesCount: post.likedBy.length,
     };
 }

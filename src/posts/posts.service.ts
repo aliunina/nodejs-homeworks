@@ -1,5 +1,6 @@
 import {
     BadRequestException,
+    ConflictException,
     ForbiddenException,
     Injectable,
     NotFoundException,
@@ -67,6 +68,52 @@ export class PostsService {
         const updatedPost = await this.postsRepository.updateById(
             postId,
             updateData
+        );
+
+        if (!updatedPost) {
+            throw new NotFoundException('Post not found');
+        }
+
+        return updatedPost;
+    }
+
+    async addLike(postId: string, userId: string) {
+        const post = await this.postsRepository.findById(postId);
+
+        if (!post) {
+            throw new NotFoundException('Post not found');
+        }
+
+        if (post.likedBy.includes(userId)) {
+            throw new ConflictException('Already liked');
+        }
+
+        const updatedPost = await this.postsRepository.addLikeById(
+            postId,
+            userId
+        );
+
+        if (!updatedPost) {
+            throw new NotFoundException('Post not found');
+        }
+
+        return updatedPost;
+    }
+
+    async deleteLike(postId: string, userId: string) {
+        const post = await this.postsRepository.findById(postId);
+
+        if (!post) {
+            throw new NotFoundException('Post not found');
+        }
+
+        if (!post.likedBy.includes(userId)) {
+            throw new NotFoundException('Like for this post not found');
+        }
+
+        const updatedPost = await this.postsRepository.deleteLikeById(
+            postId,
+            userId
         );
 
         if (!updatedPost) {

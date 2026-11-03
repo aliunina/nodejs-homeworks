@@ -6,9 +6,10 @@ export interface PostProps {
     description: string;
     createdOn: Date;
     authorId: string;
+    likedBy: string[];
 }
 
-type CreatePostParams = Omit<PostProps, 'id' | 'createdOn'>;
+type CreatePostParams = Omit<PostProps, 'id' | 'createdOn' | 'likedBy'>;
 
 export class Post {
     id: string;
@@ -16,6 +17,7 @@ export class Post {
     description: string;
     createdOn: Date;
     authorId: string;
+    likedBy: string[];
 
     constructor(props: PostProps) {
         this.id = props.id;
@@ -23,6 +25,7 @@ export class Post {
         this.description = props.description;
         this.createdOn = new Date(props.createdOn);
         this.authorId = props.authorId;
+        this.likedBy = props.likedBy;
     }
 
     static create(params: CreatePostParams): Post {
@@ -32,6 +35,7 @@ export class Post {
             description: params.description,
             createdOn: new Date(),
             authorId: params.authorId,
+            likedBy: [],
         });
     }
 
@@ -42,6 +46,7 @@ export class Post {
             description: this.description,
             createdOn: this.createdOn,
             authorId: this.authorId,
+            likedBy: this.likedBy,
         };
     }
 }

@@ -6,6 +6,7 @@ import { ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common';
 import requestLoggerMiddleware from './common/request-logger.middleware.js';
 import logger from './utils/logger.js';
+import { HttpExceptionFilter } from './common/http-exception.filter.js';
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
@@ -24,6 +25,8 @@ async function bootstrap() {
             transform: true,
         })
     );
+
+    app.useGlobalFilters(new HttpExceptionFilter());
 
     await app.listen(port, () => {
         logger.info(`Server is running on http://localhost:${port}`);

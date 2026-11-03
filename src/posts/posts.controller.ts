@@ -10,6 +10,7 @@ import {
     Patch,
     Req,
     UseGuards,
+    Put,
 } from '@nestjs/common';
 import { PostsService } from './posts.service.js';
 import { CreatePostDto } from './dtos/create-post.dto.js';
@@ -82,5 +83,31 @@ export class PostsController {
         ]);
 
         return posts.map((post: PostEntity) => toPostResponseDTO(post, user));
+    }
+
+    @Put(':id/like')
+    async addLike(
+        @Param('id') postId: string,
+        @Req() req: AuthenticatedRequest
+    ) {
+        const userId = req.user.id;
+
+        const post = await this.postsService.addLike(postId, userId);
+        const author = await this.usersService.findUserById(post.authorId);
+
+        return toPostResponseDTO(post, author);
+    }
+
+    @Delete(':id/like')
+    async deleteLike(
+        @Param('id') postId: string,
+        @Req() req: AuthenticatedRequest
+    ) {
+        const userId = req.user.id;
+
+        const post = await this.postsService.deleteLike(postId, userId);
+        const author = await this.usersService.findUserById(post.authorId);
+
+        return toPostResponseDTO(post, author);
     }
 }

@@ -87,4 +87,40 @@ export class PostsRepository {
 
         return deletedPost;
     }
+
+    async addLikeById(postId: string, userId: string) {
+        const posts = await this.getAll();
+        const index = posts.findIndex((post) => post.id === postId);
+
+        if (index === -1) {
+            return null;
+        }
+
+        const post = posts[index].toJSON();
+
+        post.likedBy.push(userId);
+        posts[index] = new Post(post);
+
+        await this.saveAll(posts);
+
+        return posts[index];
+    }
+
+    async deleteLikeById(postId: string, userId: string) {
+        const posts = await this.getAll();
+        const index = posts.findIndex((post) => post.id === postId);
+
+        if (index === -1) {
+            return null;
+        }
+
+        const post = posts[index].toJSON();
+
+        post.likedBy = post.likedBy.filter((liker) => liker !== userId);
+        posts[index] = new Post(post);
+
+        await this.saveAll(posts);
+
+        return posts[index];
+    }
 }
