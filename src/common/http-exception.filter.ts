@@ -6,7 +6,6 @@ import {
     type ExceptionFilter,
 } from '@nestjs/common';
 import type { Response } from 'express';
-import AppError from './app-error.js';
 import logger from '../utils/logger.js';
 import type { AuthenticatedRequest } from '../types/express.js';
 
@@ -36,14 +35,6 @@ export class HttpExceptionFilter implements ExceptionFilter {
     }
 
     private toBody(exception: unknown) {
-        if (exception instanceof AppError) {
-            return {
-                statusCode: exception.statusCode,
-                message: exception.message,
-                errors: exception.errors,
-            };
-        }
-
         if (exception instanceof HttpException) {
             const statusCode = exception.getStatus();
             const body = exception.getResponse();
