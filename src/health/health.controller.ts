@@ -14,7 +14,7 @@ export class HealthController {
         const version = await this.healthService.getAppVersion();
 
         return {
-            version
+            version,
         };
     }
 }

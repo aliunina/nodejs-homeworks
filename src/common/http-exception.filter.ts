@@ -5,15 +5,16 @@ import {
     HttpException,
     HttpStatus,
 } from '@nestjs/common';
-import { Request, Response } from 'express';
+import type { Response } from 'express';
 import AppError from './app-error.js';
 import logger from '../utils/logger.js';
+import type { AuthenticatedRequest } from '../types/express.js';
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
     catch(exception: unknown, host: ArgumentsHost) {
         const ctx = host.switchToHttp();
-        const req = ctx.getRequest<Request>();
+        const req = ctx.getRequest<AuthenticatedRequest>();
         const res = ctx.getResponse<Response>();
 
         const { statusCode, message, errors } = this.toBody(exception);

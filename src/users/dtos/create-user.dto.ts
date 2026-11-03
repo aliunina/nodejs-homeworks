@@ -14,12 +14,16 @@ export class CreateUserDto {
     @IsString()
     @MinLength(1)
     @MaxLength(50)
-    @Transform(({ value }) => typeof value === 'string' ? value.trim() : value)
+    @Transform(({ value }) =>
+        typeof value === 'string' ? value.trim() : value
+    )
     firstName: string;
 
     @IsString()
     @MinLength(1)
     @MaxLength(50)
-    @Transform(({ value }) => typeof value === 'string' ? value.trim() : value)
+    @Transform(({ value }) =>
+        typeof value === 'string' ? value.trim() : value
+    )
     lastName: string;
 }
