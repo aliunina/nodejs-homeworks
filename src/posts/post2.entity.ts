@@ -30,7 +30,7 @@ export class Post {
     })
     description: string;
 
-    @CreateDateColumn()
+    @CreateDateColumn({ type: 'timestamp', precision: 3 })
     createdOn: Date;
 
     @ManyToOne(() => User, (user) => user.posts, { nullable: false })
