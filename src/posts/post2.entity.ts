@@ -6,6 +6,7 @@ import {
     ManyToOne,
     OneToMany,
     PrimaryGeneratedColumn,
+    type Relation,
     RelationId,
 } from 'typeorm';
 import { User } from '../users/user2.entity.js';
@@ -32,16 +33,15 @@ export class Post {
     @CreateDateColumn()
     createdOn: Date;
 
-    @ManyToOne(() => User, (user) => user.posts)
+    @ManyToOne(() => User, (user) => user.posts, { nullable: false })
     @JoinColumn({ name: 'authorId' })
-    @Column({ nullable: false })
-    author: User;
+    author: Relation<User>;
 
     @RelationId((post: Post) => post.author)
     authorId: string;
 
     @OneToMany(() => PostLike, (like) => like.post, { onDelete: 'CASCADE' })
-    likes: PostLike[];
+    likes: Relation<PostLike[]>;
 
     static create(params: {
         title: string;

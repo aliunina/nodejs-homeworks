@@ -1,4 +1,10 @@
-import { Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import {
+    Entity,
+    JoinColumn,
+    ManyToOne,
+    PrimaryColumn,
+    type Relation,
+} from 'typeorm';
 import { User } from '../users/user2.entity.js';
 import { Post } from './post2.entity.js';
 
@@ -12,9 +18,9 @@ export class PostLike {
 
     @ManyToOne(() => Post, (post) => post.likes)
     @JoinColumn({ name: 'postId' })
-    post: Post;
+    post: Relation<Post>;
 
     @ManyToOne(() => User)
     @JoinColumn({ name: 'userId' })
-    user: User;
+    user: Relation<User>;
 }

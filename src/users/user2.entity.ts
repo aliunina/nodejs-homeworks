@@ -1,4 +1,10 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+    Column,
+    Entity,
+    OneToMany,
+    PrimaryGeneratedColumn,
+    type Relation,
+} from 'typeorm';
 import { Post } from '../posts/post2.entity.js';
 import bcrypt from 'bcrypt';
 
@@ -36,7 +42,7 @@ export class User {
     password: string;
 
     @OneToMany(() => Post, (post) => post.author)
-    posts: Post[];
+    posts: Relation<Post[]>;
 
     static async create(params: {
         firstName: string;
