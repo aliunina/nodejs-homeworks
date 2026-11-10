@@ -5,11 +5,11 @@ import {
     PrimaryGeneratedColumn,
     type Relation,
 } from 'typeorm';
-import { Post } from '../posts/post2.entity.js';
+import Post from '../../posts/entities/post.entity.js';
 import bcrypt from 'bcrypt';
 
 @Entity('users')
-export class User {
+export default class User {
     private static saltRounds = 10;
 
     @PrimaryGeneratedColumn('uuid')

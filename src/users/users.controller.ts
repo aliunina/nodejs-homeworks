@@ -6,6 +6,7 @@ import {
     HttpStatus,
     Patch,
     Post,
+    Query,
     Req,
     UseGuards,
 } from '@nestjs/common';
@@ -15,6 +16,8 @@ import { UpdateUserDto } from './dtos/update-user.dto.js';
 import type { AuthenticatedRequest } from '../types/express.js';
 import { toUserResponseDto } from './dtos/user-response.dto.js';
 import { UserAuthGuard } from '../auth/user-auth.guard.js';
+import User from "./entities/user.entity.js";
+import UserListQueryDto from "./dtos/user-list-query.dto.js";
 
 @Controller('users')
 export class UsersController {
@@ -26,6 +29,19 @@ export class UsersController {
         const user = await this.usersService.createUser(body);
 
         return toUserResponseDto(user);
+    }
+
+    @Get()
+    @UseGuards(UserAuthGuard)
+    async getUsers(@Query() query: UserListQueryDto) {
+        const users = await this.usersService.findUsersWithFirstPostAndLikes(query);
+
+        return {
+            data: users.data.map((user: User) => toUserResponseDto(user)),
+            page: users.page,
+            limit: users.limit,
+            total: users.total,
+        };
     }
 
     @Get('me')

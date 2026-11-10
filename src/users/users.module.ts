@@ -4,7 +4,7 @@ import { UsersService } from './users.service.js';
 import { UsersRepository } from './users.repository.js';
 import { UserAuthGuard } from '../auth/user-auth.guard.js';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from './user2.entity.js';
+import { User } from './entities/user.entity.js';
 
 @Module({
     controllers: [UsersController],

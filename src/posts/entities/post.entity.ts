@@ -9,11 +9,11 @@ import {
     type Relation,
     RelationId,
 } from 'typeorm';
-import { User } from '../users/user2.entity.js';
+import { User } from '../../users/entities/user.entity.js';
 import { PostLike } from './post-like.entity.js';
 
 @Entity('posts')
-export class Post {
+export default class Post {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 

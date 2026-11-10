@@ -11,15 +11,17 @@ import {
     Req,
     UseGuards,
     Put,
+    Query,
 } from '@nestjs/common';
 import { PostsService } from './posts.service.js';
 import { CreatePostDto } from './dtos/create-post.dto.js';
 import { UpdatePostDto } from './dtos/update-post.dto.js';
 import type { AuthenticatedRequest } from '../types/express.js';
-import { toPostResponseDTO } from './dtos/post-response.dto.js';
+import { toPostResponseDto } from './dtos/post-response.dto.js';
 import { UsersService } from '../users/users.service.js';
-import type PostEntity from './post.entity.js';
+import type PostEntity from './entities/post.entity.js';
 import { UserAuthGuard } from '../auth/user-auth.guard.js';
+import PostListQueryDto from './dtos/post-list-query.dto.js';
 
 @Controller('posts')
 @UseGuards(UserAuthGuard)
@@ -37,12 +39,9 @@ export class PostsController {
     ) {
         const userId = req.user.id;
 
-        const [user, post] = await Promise.all([
-            this.usersService.findUserById(userId),
-            this.postsService.createPost(body, userId),
-        ]);
+        const post = await this.postsService.createPost(body, userId);
 
-        return toPostResponseDTO(post, user);
+        return toPostResponseDto(post);
     }
 
     @Patch(':id')
@@ -53,12 +52,9 @@ export class PostsController {
     ) {
         const userId = req.user.id;
 
-        const [user, post] = await Promise.all([
-            this.usersService.findUserById(userId),
-            this.postsService.updatePost(postId, userId, body),
-        ]);
+        const post = await this.postsService.updatePost(postId, userId, body);
 
-        return toPostResponseDTO(post, user);
+        return toPostResponseDto(post);
     }
 
     @Delete(':id')
@@ -74,15 +70,23 @@ export class PostsController {
     }
 
     @Get()
-    async getCurrentUserPosts(@Req() req: AuthenticatedRequest) {
+    async getCurrentUserPosts(
+        @Req() req: AuthenticatedRequest,
+        @Query() query: PostListQueryDto
+    ) {
         const userId = req.user.id;
 
-        const [user, posts] = await Promise.all([
-            this.usersService.findUserById(userId),
-            this.postsService.findAllPostsByAuthorId(userId),
-        ]);
+        const posts = await this.postsService.findAllPostsByAuthorId(
+            userId,
+            query
+        );
 
-        return posts.map((post: PostEntity) => toPostResponseDTO(post, user));
+        return {
+            data: posts.data.map((post: PostEntity) => toPostResponseDto(post)),
+            page: posts.page,
+            limit: posts.limit,
+            total: posts.total,
+        };
     }
 
     @Put(':id/like')
@@ -93,9 +97,8 @@ export class PostsController {
         const userId = req.user.id;
 
         const post = await this.postsService.addLike(postId, userId);
-        const author = await this.usersService.findUserById(post.authorId);
 
-        return toPostResponseDTO(post, author);
+        return toPostResponseDto(post);
     }
 
     @Delete(':id/like')
@@ -106,8 +109,7 @@ export class PostsController {
         const userId = req.user.id;
 
         const post = await this.postsService.deleteLike(postId, userId);
-        const author = await this.usersService.findUserById(post.authorId);
 
-        return toPostResponseDTO(post, author);
+        return toPostResponseDto(post);
     }
 }

@@ -5,11 +5,11 @@ import {
     PrimaryColumn,
     type Relation,
 } from 'typeorm';
-import { User } from '../users/user2.entity.js';
-import { Post } from './post2.entity.js';
+import Post from "./post.entity.js";
+import User from "../../users/entities/user.entity.js";
 
 @Entity('post_likes')
-export class PostLike {
+export default class PostLike {
     @PrimaryColumn({ type: 'varchar', length: 36 })
     postId: string;
 
