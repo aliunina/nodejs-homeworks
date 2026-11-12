@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { MailtrapClient } from 'mailtrap';
 import type User from '../users/user.entity.js';
 import { ConfigService } from '@nestjs/config';
@@ -20,7 +20,9 @@ export class EmailService {
         const name = this.configService.getOrThrow<string>('MAIL_FROM_NAME');
 
         if (!isEmail(email) || name.trim().length === 0) {
-            throw new Error('Mail sender is not configured');
+            throw new InternalServerErrorException(
+                'Mail sender is not configured'
+            );
         }
 
         this.client = new MailtrapClient({ token });

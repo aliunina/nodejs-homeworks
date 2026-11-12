@@ -5,18 +5,18 @@ import {
 } from '@nestjs/common';
 import type { LoginDto } from './dtos/login.dto.js';
 import jwt, { type SignOptions } from 'jsonwebtoken';
-import { UsersRepository } from '../users/users.repository.js';
 import { ConfigService } from '@nestjs/config';
+import { UsersService } from '../users/users.service.js';
 
 @Injectable()
 export class AuthService {
     constructor(
-        private readonly usersRepository: UsersRepository,
+        private readonly usersService: UsersService,
         private readonly configService: ConfigService
     ) {}
 
     async login(loginInput: LoginDto) {
-        const user = await this.usersRepository.findByEmail(loginInput.email);
+        const user = await this.usersService.findUserByEmail(loginInput.email);
 
         if (!user || !(await user.comparePassword(loginInput.password))) {
             throw new UnauthorizedException('Invalid credentials');
@@ -39,7 +39,7 @@ export class AuthService {
 
         return {
             jwtToken,
-            user,
+            user: user.toJSON(),
         };
     }
 }

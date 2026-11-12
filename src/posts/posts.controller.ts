@@ -17,17 +17,13 @@ import { CreatePostDto } from './dtos/create-post.dto.js';
 import { UpdatePostDto } from './dtos/update-post.dto.js';
 import type { AuthenticatedRequest } from '../types/express.js';
 import { toPostResponseDTO } from './dtos/post-response.dto.js';
-import { UsersService } from '../users/users.service.js';
 import type PostEntity from './post.entity.js';
 import { UserAuthGuard } from '../auth/user-auth.guard.js';
 
 @Controller('posts')
 @UseGuards(UserAuthGuard)
 export class PostsController {
-    constructor(
-        private readonly postsService: PostsService,
-        private readonly usersService: UsersService
-    ) {}
+    constructor(private readonly postsService: PostsService) {}
 
     @Post()
     @HttpCode(HttpStatus.CREATED)
@@ -37,12 +33,9 @@ export class PostsController {
     ) {
         const userId = req.user.id;
 
-        const [user, post] = await Promise.all([
-            this.usersService.findUserById(userId),
-            this.postsService.createPost(body, userId),
-        ]);
+        const createdPost = await this.postsService.createPost(body, userId);
 
-        return toPostResponseDTO(post, user);
+        return toPostResponseDTO(createdPost.post, createdPost.author);
     }
 
     @Patch(':id')
@@ -53,12 +46,13 @@ export class PostsController {
     ) {
         const userId = req.user.id;
 
-        const [user, post] = await Promise.all([
-            this.usersService.findUserById(userId),
-            this.postsService.updatePost(postId, userId, body),
-        ]);
+        const updatedPost = await this.postsService.updatePost(
+            postId,
+            userId,
+            body
+        );
 
-        return toPostResponseDTO(post, user);
+        return toPostResponseDTO(updatedPost.post, updatedPost.author);
     }
 
     @Delete(':id')
@@ -77,12 +71,12 @@ export class PostsController {
     async getCurrentUserPosts(@Req() req: AuthenticatedRequest) {
         const userId = req.user.id;
 
-        const [user, posts] = await Promise.all([
-            this.usersService.findUserById(userId),
-            this.postsService.findAllPostsByAuthorId(userId),
-        ]);
+        const userPosts =
+            await this.postsService.findAllPostsByAuthorId(userId);
 
-        return posts.map((post: PostEntity) => toPostResponseDTO(post, user));
+        return userPosts.posts.map((post: PostEntity) =>
+            toPostResponseDTO(post, userPosts.author)
+        );
     }
 
     @Put(':id/like')
@@ -92,10 +86,9 @@ export class PostsController {
     ) {
         const userId = req.user.id;
 
-        const post = await this.postsService.addLike(postId, userId);
-        const author = await this.usersService.findUserById(post.authorId);
+        const likedPost = await this.postsService.addLike(postId, userId);
 
-        return toPostResponseDTO(post, author);
+        return toPostResponseDTO(likedPost.post, likedPost.author);
     }
 
     @Delete(':id/like')
@@ -105,9 +98,8 @@ export class PostsController {
     ) {
         const userId = req.user.id;
 
-        const post = await this.postsService.deleteLike(postId, userId);
-        const author = await this.usersService.findUserById(post.authorId);
+        const unlikedPost = await this.postsService.deleteLike(postId, userId);
 
-        return toPostResponseDTO(post, author);
+        return toPostResponseDTO(unlikedPost.post, unlikedPost.author);
     }
 }

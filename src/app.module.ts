@@ -6,6 +6,8 @@ import { PostsModule } from './posts/posts.module.js';
 import { AuthModule } from './auth/auth.module.js';
 import { EmailModule } from './email/email.module.js';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { APP_GUARD } from '@nestjs/core';
+import { UserAuthGuard } from './auth/user-auth.guard.js';
 
 @Module({
     imports: [
@@ -19,5 +21,6 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
         AuthModule,
         EmailModule,
     ],
+    providers: [{ provide: APP_GUARD, useClass: UserAuthGuard }],
 })
 export class AppModule {}

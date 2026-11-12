@@ -10,7 +10,10 @@ export class PostResponseDto {
     likesCount: number;
 }
 
-export function toPostResponseDTO(post: Post, author: User): PostResponseDto {
+export function toPostResponseDTO(
+    post: Post,
+    author: Pick<User, 'firstName' | 'lastName'>
+): PostResponseDto {
     return {
         id: post.id,
         title: post.title,
