@@ -1,31 +1,54 @@
 import {
-    BadRequestException,
     ConflictException,
     ForbiddenException,
     Injectable,
     NotFoundException,
 } from '@nestjs/common';
-import { PostsRepository } from './posts.repository.js';
+import { PostsRepository, Status } from './posts.repository.js';
 import type { CreatePostDto } from './dtos/create-post.dto.js';
 import type { UpdatePostDto } from './dtos/update-post.dto.js';
 import Post from './post.entity.js';
+import { UsersService } from '../users/users.service.js';
 
 @Injectable()
 export class PostsService {
-    constructor(private readonly postsRepository: PostsRepository) {}
+    constructor(
+        private readonly postsRepository: PostsRepository,
+        private readonly usersService: UsersService
+    ) {}
 
     async createPost(createData: CreatePostDto, userId: string) {
+        const author = await this.usersService.findUserById(userId);
+
+        if (!author) {
+            throw new NotFoundException('User not found');
+        }
+
         const newPost = Post.create({
             ...createData,
             authorId: userId,
         });
         const savedPost = await this.postsRepository.save(newPost);
 
-        return savedPost;
+        return {
+            post: savedPost,
+            author,
+        };
     }
 
     async findAllPostsByAuthorId(authorId: string) {
-        return this.postsRepository.findAllByAuthorId(authorId);
+        const author = await this.usersService.findUserById(authorId);
+
+        if (!author) {
+            throw new NotFoundException('User not found');
+        }
+
+        const posts = await this.postsRepository.findAllByAuthorId(authorId);
+
+        return {
+            posts,
+            author,
+        };
     }
 
     async deletePost(postId: string, userId: string) {
@@ -47,12 +70,10 @@ export class PostsService {
         userId: string,
         updateData: UpdatePostDto
     ) {
-        const hasUpdate = Object.values(updateData).some(
-            (value) => value !== undefined
-        );
+        const author = await this.usersService.findUserById(userId);
 
-        if (!hasUpdate) {
-            throw new BadRequestException('Request body can not be empty');
+        if (!author) {
+            throw new NotFoundException('User not found');
         }
 
         const post = await this.postsRepository.findById(postId);
@@ -74,18 +95,17 @@ export class PostsService {
             throw new NotFoundException('Post not found');
         }
 
-        return updatedPost;
+        return {
+            post: updatedPost,
+            author,
+        };
     }
 
     async addLike(postId: string, userId: string) {
-        const post = await this.postsRepository.findById(postId);
+        const user = await this.usersService.findUserById(userId);
 
-        if (!post) {
-            throw new NotFoundException('Post not found');
-        }
-
-        if (post.likedBy.includes(userId)) {
-            throw new ConflictException('Already liked');
+        if (!user) {
+            throw new NotFoundException('User not found');
         }
 
         const updatedPost = await this.postsRepository.addLikeById(
@@ -93,14 +113,35 @@ export class PostsService {
             userId
         );
 
-        if (!updatedPost) {
+        if (updatedPost.status === Status.NOT_FOUND) {
             throw new NotFoundException('Post not found');
         }
 
-        return updatedPost;
+        if (updatedPost.status === Status.ALREADY_LIKED) {
+            throw new ConflictException('Already liked');
+        }
+
+        const author = await this.usersService.findUserById(
+            updatedPost.post.authorId
+        );
+
+        if (!author) {
+            throw new NotFoundException('Post author not found');
+        }
+
+        return {
+            post: updatedPost.post,
+            author,
+        };
     }
 
     async deleteLike(postId: string, userId: string) {
+        const user = await this.usersService.findUserById(userId);
+
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
+
         const post = await this.postsRepository.findById(postId);
 
         if (!post) {
@@ -120,6 +161,17 @@ export class PostsService {
             throw new NotFoundException('Post not found');
         }
 
-        return updatedPost;
+        const author = await this.usersService.findUserById(
+            updatedPost.authorId
+        );
+
+        if (!author) {
+            throw new NotFoundException('Post author not found');
+        }
+
+        return {
+            post: updatedPost,
+            author,
+        };
     }
 }

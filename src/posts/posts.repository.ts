@@ -4,6 +4,17 @@ import { readJsonFile, writeJsonFile } from '../utils/json-file.js';
 import Post, { type PostProps } from './post.entity.js';
 import type { UpdatePostDto } from './dtos/update-post.dto.js';
 
+export enum Status {
+    ALREADY_LIKED,
+    OK,
+    NOT_FOUND,
+}
+
+type AddLikeResult =
+    | { status: Status.NOT_FOUND; post: null }
+    | { status: Status.ALREADY_LIKED; post: null }
+    | { status: Status.OK; post: Post };
+
 @Injectable()
 export class PostsRepository {
     private static readonly POSTS_DATA_PATH = path.join(
@@ -88,22 +99,35 @@ export class PostsRepository {
         return deletedPost;
     }
 
-    async addLikeById(postId: string, userId: string) {
+    async addLikeById(postId: string, userId: string): Promise<AddLikeResult> {
         const posts = await this.getAll();
         const index = posts.findIndex((post) => post.id === postId);
 
         if (index === -1) {
-            return null;
+            return {
+                status: Status.NOT_FOUND,
+                post: null,
+            };
         }
 
         const post = posts[index].toJSON();
+
+        if (post.likedBy.includes(userId)) {
+            return {
+                status: Status.ALREADY_LIKED,
+                post: null,
+            };
+        }
 
         post.likedBy.push(userId);
         posts[index] = new Post(post);
 
         await this.saveAll(posts);
 
-        return posts[index];
+        return {
+            status: Status.OK,
+            post: posts[index],
+        };
     }
 
     async deleteLikeById(postId: string, userId: string) {

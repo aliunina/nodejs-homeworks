@@ -1,5 +1,4 @@
 import {
-    BadRequestException,
     ConflictException,
     Injectable,
     NotFoundException,
@@ -52,14 +51,6 @@ export class UsersService {
     }
 
     async updateUser(userId: string, updateData: UpdateUserDto) {
-        const hasUpdate = Object.values(updateData).some(
-            (value) => value !== undefined
-        );
-
-        if (!hasUpdate) {
-            throw new BadRequestException('Request body can not be empty');
-        }
-
         const updatedUser = await this.usersRepository.updateById(
             userId,
             updateData
@@ -69,6 +60,7 @@ export class UsersService {
             throw new NotFoundException('User not found');
         }
 
+        // Email is best-effort: the listener logs failures and does not affect this response.
         this.eventEmitter.emit('profileUpdated', updatedUser);
 
         return updatedUser;

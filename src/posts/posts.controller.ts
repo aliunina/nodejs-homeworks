@@ -19,6 +19,7 @@ import type { AuthenticatedRequest } from '../types/express.js';
 import { toPostResponseDTO } from './dtos/post-response.dto.js';
 import type PostEntity from './post.entity.js';
 import { UserAuthGuard } from '../auth/user-auth.guard.js';
+import { HasUpdateGuard } from '../common/has-update.guard.js';
 
 @Controller('posts')
 @UseGuards(UserAuthGuard)
@@ -39,6 +40,7 @@ export class PostsController {
     }
 
     @Patch(':id')
+    @UseGuards(HasUpdateGuard)
     async updatePost(
         @Param('id') postId: string,
         @Body() body: UpdatePostDto,
