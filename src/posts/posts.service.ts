@@ -1,58 +1,70 @@
 import {
+    BadRequestException,
     ConflictException,
     ForbiddenException,
     Injectable,
     NotFoundException,
 } from '@nestjs/common';
-import { PostsRepository, Status } from './posts.repository.js';
 import type { CreatePostDto } from './dtos/create-post.dto.js';
 import type { UpdatePostDto } from './dtos/update-post.dto.js';
-import Post from './post.entity.js';
-import { UsersService } from '../users/users.service.js';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import Post from './entities/post.entity.js';
+import PostLike from './entities/post-like.entity.js';
+import PostListQueryDto from './dtos/post-list-query.dto.js';
 
 @Injectable()
 export class PostsService {
     constructor(
-        private readonly postsRepository: PostsRepository,
-        private readonly usersService: UsersService
+        @InjectRepository(Post)
+        private readonly postsRepository: Repository<Post>,
+        @InjectRepository(PostLike)
+        private readonly postLikesRepository: Repository<PostLike>
     ) {}
 
     async createPost(createData: CreatePostDto, userId: string) {
-        const author = await this.usersService.findUserById(userId);
-
-        if (!author) {
-            throw new NotFoundException('User not found');
-        }
-
         const newPost = Post.create({
             ...createData,
             authorId: userId,
         });
         const savedPost = await this.postsRepository.save(newPost);
 
-        return {
-            post: savedPost,
-            author,
-        };
+        return this.getPostWithAuthorAndLikes(savedPost.id);
     }
 
-    async findAllPostsByAuthorId(authorId: string) {
-        const author = await this.usersService.findUserById(authorId);
+    async findAllPostsByAuthorId(authorId: string, query: PostListQueryDto) {
+        const queryBuilder = this.postsRepository
+            .createQueryBuilder('post')
+            .leftJoinAndSelect('post.author', 'author')
+            .leftJoinAndSelect('post.likes', 'likes')
+            .where('post.authorId = :authorId', { authorId });
 
-        if (!author) {
-            throw new NotFoundException('User not found');
+        if (query.title) {
+            queryBuilder.andWhere('post.title LIKE :title', {
+                title: `%${query.title}%`,
+            });
         }
 
-        const posts = await this.postsRepository.findAllByAuthorId(authorId);
+        queryBuilder
+            .orderBy(
+                `post.${query.sortBy}`,
+                query.order.toUpperCase() as 'ASC' | 'DESC'
+            )
+            .skip((query.page - 1) * query.limit)
+            .take(query.limit);
+
+        const [posts, total] = await queryBuilder.getManyAndCount();
 
         return {
-            posts,
-            author,
+            data: posts,
+            page: query.page,
+            limit: query.limit,
+            total,
         };
     }
 
     async deletePost(postId: string, userId: string) {
-        const post = await this.postsRepository.findById(postId);
+        const post = await this.postsRepository.findOneBy({ id: postId });
 
         if (!post) {
             throw new NotFoundException('Post not found');
@@ -62,7 +74,7 @@ export class PostsService {
             throw new ForbiddenException('Post is not authored by the user');
         }
 
-        return await this.postsRepository.deleteById(postId);
+        return await this.postsRepository.delete({ id: postId });
     }
 
     async updatePost(
@@ -70,13 +82,17 @@ export class PostsService {
         userId: string,
         updateData: UpdatePostDto
     ) {
-        const author = await this.usersService.findUserById(userId);
+        const hasUpdate = Object.values(updateData).some(
+            (value) => value !== undefined
+        );
 
-        if (!author) {
-            throw new NotFoundException('User not found');
+        if (!hasUpdate) {
+            throw new BadRequestException('Request body can not be empty');
         }
 
-        const post = await this.postsRepository.findById(postId);
+        const post = await this.postsRepository.findOneBy({
+            id: postId,
+        });
 
         if (!post) {
             throw new NotFoundException('Post not found');
@@ -86,92 +102,76 @@ export class PostsService {
             throw new ForbiddenException('Post is not authored by the user');
         }
 
-        const updatedPost = await this.postsRepository.updateById(
-            postId,
-            updateData
-        );
+        await this.postsRepository.update(postId, updateData);
 
-        if (!updatedPost) {
-            throw new NotFoundException('Post not found');
-        }
-
-        return {
-            post: updatedPost,
-            author,
-        };
+        return this.getPostWithAuthorAndLikes(postId);
     }
 
     async addLike(postId: string, userId: string) {
-        const user = await this.usersService.findUserById(userId);
-
-        if (!user) {
-            throw new NotFoundException('User not found');
-        }
-
-        const updatedPost = await this.postsRepository.addLikeById(
-            postId,
-            userId
-        );
-
-        if (updatedPost.status === Status.NOT_FOUND) {
-            throw new NotFoundException('Post not found');
-        }
-
-        if (updatedPost.status === Status.ALREADY_LIKED) {
-            throw new ConflictException('Already liked');
-        }
-
-        const author = await this.usersService.findUserById(
-            updatedPost.post.authorId
-        );
-
-        if (!author) {
-            throw new NotFoundException('Post author not found');
-        }
-
-        return {
-            post: updatedPost.post,
-            author,
-        };
-    }
-
-    async deleteLike(postId: string, userId: string) {
-        const user = await this.usersService.findUserById(userId);
-
-        if (!user) {
-            throw new NotFoundException('User not found');
-        }
-
-        const post = await this.postsRepository.findById(postId);
+        const post = await this.postsRepository.findOneBy({
+            id: postId,
+        });
 
         if (!post) {
             throw new NotFoundException('Post not found');
         }
 
-        if (!post.likedBy.includes(userId)) {
-            throw new NotFoundException('Like for this post not found');
+        const existingPostLike = await this.postLikesRepository.findOneBy({
+            postId,
+            userId,
+        });
+
+        if (existingPostLike) {
+            throw new ConflictException('Already liked');
         }
 
-        const updatedPost = await this.postsRepository.deleteLikeById(
-            postId,
-            userId
-        );
+        const postLike = new PostLike();
+        postLike.postId = postId;
+        postLike.userId = userId;
 
-        if (!updatedPost) {
+        await this.postLikesRepository.save(postLike);
+
+        return this.getPostWithAuthorAndLikes(postId);
+    }
+
+    async deleteLike(postId: string, userId: string) {
+        const post = await this.postsRepository.findOneBy({
+            id: postId,
+        });
+
+        if (!post) {
             throw new NotFoundException('Post not found');
         }
 
-        const author = await this.usersService.findUserById(
-            updatedPost.authorId
-        );
+        const existingPostLike = await this.postLikesRepository.findOneBy({
+            postId,
+            userId,
+        });
 
-        if (!author) {
-            throw new NotFoundException('Post author not found');
+        if (!existingPostLike) {
+            throw new NotFoundException('Like for this post not found');
         }
 
-        return {
-            post: updatedPost,
-            author,
-        };
+        await this.postLikesRepository.delete({
+            postId,
+            userId,
+        });
+
+        return this.getPostWithAuthorAndLikes(postId);
+    }
+
+    private async getPostWithAuthorAndLikes(postId: string) {
+        const post = await this.postsRepository
+            .createQueryBuilder('post')
+            .leftJoinAndSelect('post.author', 'author')
+            .leftJoinAndSelect('post.likes', 'likes')
+            .where('post.id = :postId', { postId })
+            .getOne();
+
+        if (!post) {
+            throw new NotFoundException('Post not found');
+        }
+
+        return post;
     }
 }

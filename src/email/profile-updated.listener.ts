@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { EmailService } from './email.service.js';
 import { OnEvent } from '@nestjs/event-emitter';
-import type User from '../users/user.entity.js';
 import logger from '../utils/logger.js';
+import User from '../users/entities/user.entity.js';
 
 @Injectable()
 export class ProfileUpdatedListener {

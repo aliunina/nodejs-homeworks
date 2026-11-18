@@ -1,4 +1,4 @@
-import type User from '../user.entity.js';
+import type User from '../entities/user.entity.js';
 
 export class UserResponseDto {
     id: string;

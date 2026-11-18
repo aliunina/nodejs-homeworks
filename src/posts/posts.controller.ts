@@ -11,20 +11,26 @@ import {
     Req,
     UseGuards,
     Put,
+    Query,
 } from '@nestjs/common';
 import { PostsService } from './posts.service.js';
 import { CreatePostDto } from './dtos/create-post.dto.js';
 import { UpdatePostDto } from './dtos/update-post.dto.js';
 import type { AuthenticatedRequest } from '../types/express.js';
-import { toPostResponseDTO } from './dtos/post-response.dto.js';
-import type PostEntity from './post.entity.js';
+import { toPostResponseDto } from './dtos/post-response.dto.js';
+import { UsersService } from '../users/users.service.js';
+import type PostEntity from './entities/post.entity.js';
 import { UserAuthGuard } from '../auth/user-auth.guard.js';
+import PostListQueryDto from './dtos/post-list-query.dto.js';
 import { HasUpdateGuard } from '../common/has-update.guard.js';
 
 @Controller('posts')
 @UseGuards(UserAuthGuard)
 export class PostsController {
-    constructor(private readonly postsService: PostsService) {}
+    constructor(
+        private readonly postsService: PostsService,
+        private readonly usersService: UsersService
+    ) {}
 
     @Post()
     @HttpCode(HttpStatus.CREATED)
@@ -34,9 +40,9 @@ export class PostsController {
     ) {
         const userId = req.user.id;
 
-        const createdPost = await this.postsService.createPost(body, userId);
+        const post = await this.postsService.createPost(body, userId);
 
-        return toPostResponseDTO(createdPost.post, createdPost.author);
+        return toPostResponseDto(post);
     }
 
     @Patch(':id')
@@ -48,13 +54,9 @@ export class PostsController {
     ) {
         const userId = req.user.id;
 
-        const updatedPost = await this.postsService.updatePost(
-            postId,
-            userId,
-            body
-        );
+        const post = await this.postsService.updatePost(postId, userId, body);
 
-        return toPostResponseDTO(updatedPost.post, updatedPost.author);
+        return toPostResponseDto(post);
     }
 
     @Delete(':id')
@@ -70,15 +72,23 @@ export class PostsController {
     }
 
     @Get()
-    async getCurrentUserPosts(@Req() req: AuthenticatedRequest) {
+    async getCurrentUserPosts(
+        @Req() req: AuthenticatedRequest,
+        @Query() query: PostListQueryDto
+    ) {
         const userId = req.user.id;
 
-        const userPosts =
-            await this.postsService.findAllPostsByAuthorId(userId);
-
-        return userPosts.posts.map((post: PostEntity) =>
-            toPostResponseDTO(post, userPosts.author)
+        const posts = await this.postsService.findAllPostsByAuthorId(
+            userId,
+            query
         );
+
+        return {
+            data: posts.data.map((post: PostEntity) => toPostResponseDto(post)),
+            page: posts.page,
+            limit: posts.limit,
+            total: posts.total,
+        };
     }
 
     @Put(':id/like')
@@ -88,9 +98,9 @@ export class PostsController {
     ) {
         const userId = req.user.id;
 
-        const likedPost = await this.postsService.addLike(postId, userId);
+        const post = await this.postsService.addLike(postId, userId);
 
-        return toPostResponseDTO(likedPost.post, likedPost.author);
+        return toPostResponseDto(post);
     }
 
     @Delete(':id/like')
@@ -100,8 +110,8 @@ export class PostsController {
     ) {
         const userId = req.user.id;
 
-        const unlikedPost = await this.postsService.deleteLike(postId, userId);
+        const post = await this.postsService.deleteLike(postId, userId);
 
-        return toPostResponseDTO(unlikedPost.post, unlikedPost.author);
+        return toPostResponseDto(post);
     }
 }

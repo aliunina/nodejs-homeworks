@@ -1,8 +1,8 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { MailtrapClient } from 'mailtrap';
-import type User from '../users/user.entity.js';
 import { ConfigService } from '@nestjs/config';
 import { isEmail } from 'class-validator';
+import User from '../users/entities/user.entity.js';
 
 @Injectable()
 export class EmailService {
