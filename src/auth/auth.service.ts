@@ -16,7 +16,11 @@ export class AuthService {
     ) {}
 
     async login(loginInput: LoginDto) {
-        const user = await this.usersRepository.findByEmail(loginInput.email);
+        const user = await this.usersRepository
+            .createQueryBuilder('user')
+            .addSelect('user.password')
+            .where('user.email = :email', { email: loginInput.email })
+            .getOne();
 
         if (!user || !(await user.comparePassword(loginInput.password))) {
             throw new UnauthorizedException('Invalid credentials');

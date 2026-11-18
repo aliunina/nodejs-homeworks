@@ -9,8 +9,8 @@ import {
     type Relation,
     RelationId,
 } from 'typeorm';
-import { User } from '../../users/entities/user.entity.js';
-import { PostLike } from './post-like.entity.js';
+import User from '../../users/entities/user.entity.js';
+import PostLike from './post-like.entity.js';
 
 @Entity('posts')
 export default class Post {
@@ -51,7 +51,7 @@ export default class Post {
         const post = new Post();
         post.title = params.title;
         post.description = params.description;
-        post.authorId = params.authorId;
+        post.author = { id: params.authorId } as User;
         return post;
     }
 }

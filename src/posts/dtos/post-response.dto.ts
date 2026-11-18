@@ -16,6 +16,6 @@ export function toPostResponseDto(post: Post): PostResponseDto {
         description: post.description,
         createdOn: post.createdOn,
         authorName: `${post.author.firstName} ${post.author.lastName}`,
-        likesCount: post.likes.length,
+        likesCount: post.likes?.length ?? 0,
     };
 }

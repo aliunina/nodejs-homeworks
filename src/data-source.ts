@@ -1,9 +1,9 @@
 import { config } from 'dotenv';
 import { ConfigService } from '@nestjs/config';
 import { DataSource } from 'typeorm';
-import { User } from './users/entities/user.entity.js';
-import { Post } from './posts/entities/post.entity.js';
-import { PostLike } from './posts/post-like.entity.js';
+import User from './users/entities/user.entity.js';
+import Post from './posts/entities/post.entity.js';
+import PostLike from './posts/entities/post-like.entity.js';
 
 config();
 

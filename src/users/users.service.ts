@@ -8,8 +8,8 @@ import { UsersRepository } from './users.repository.js';
 import type { CreateUserDto } from './dtos/create-user.dto.js';
 import type { UpdateUserDto } from './dtos/update-user.dto.js';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import User from "./entities/user.entity.js";
-import UserListQueryDto from "./dtos/user-list-query.dto.js";
+import User from './entities/user.entity.js';
+import UserListQueryDto from './dtos/user-list-query.dto.js';
 
 @Injectable()
 export class UsersService {

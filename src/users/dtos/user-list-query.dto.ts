@@ -1,5 +1,12 @@
 import PageQueryDto from '../../common/page-query.dto.js';
-import { IsEmail, IsIn, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
+import {
+    IsEmail,
+    IsIn,
+    IsOptional,
+    IsString,
+    MaxLength,
+    MinLength,
+} from 'class-validator';
 
 export default class UserListQueryDto extends PageQueryDto {
     @IsOptional()

@@ -29,17 +29,19 @@ export class PostsService {
         });
         const savedPost = await this.postsRepository.save(newPost);
 
-        return savedPost;
+        return this.getPostWithAuthorAndLikes(savedPost.id);
     }
 
     async findAllPostsByAuthorId(authorId: string, query: PostListQueryDto) {
         const queryBuilder = this.postsRepository
             .createQueryBuilder('post')
+            .leftJoinAndSelect('post.author', 'author')
+            .leftJoinAndSelect('post.likes', 'likes')
             .where('post.authorId = :authorId', { authorId });
 
         if (query.title) {
             queryBuilder.andWhere('post.title LIKE :title', {
-                title: `%${query.title}`,
+                title: `%${query.title}%`,
             });
         }
 
@@ -102,15 +104,7 @@ export class PostsService {
 
         await this.postsRepository.update(postId, updateData);
 
-        const updatedPost = await this.postsRepository.findOneBy({
-            id: postId,
-        });
-
-        if (!updatedPost) {
-            throw new NotFoundException('Post not found');
-        }
-
-        return updatedPost;
+        return this.getPostWithAuthorAndLikes(postId);
     }
 
     async addLike(postId: string, userId: string) {
@@ -137,15 +131,7 @@ export class PostsService {
 
         await this.postLikesRepository.save(postLike);
 
-        const updatedPost = await this.postsRepository.findOneBy({
-            id: postId,
-        });
-
-        if (!updatedPost) {
-            throw new NotFoundException('Post not found');
-        }
-
-        return updatedPost;
+        return this.getPostWithAuthorAndLikes(postId);
     }
 
     async deleteLike(postId: string, userId: string) {
@@ -171,14 +157,21 @@ export class PostsService {
             userId,
         });
 
-        const updatedPost = await this.postsRepository.findOneBy({
-            id: postId,
-        });
+        return this.getPostWithAuthorAndLikes(postId);
+    }
 
-        if (!updatedPost) {
+    private async getPostWithAuthorAndLikes(postId: string) {
+        const post = await this.postsRepository
+            .createQueryBuilder('post')
+            .leftJoinAndSelect('post.author', 'author')
+            .leftJoinAndSelect('post.likes', 'likes')
+            .where('post.id = :postId', { postId })
+            .getOne();
+
+        if (!post) {
             throw new NotFoundException('Post not found');
         }
 
-        return updatedPost;
+        return post;
     }
 }

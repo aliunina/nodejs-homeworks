@@ -5,8 +5,8 @@ import {
     PrimaryColumn,
     type Relation,
 } from 'typeorm';
-import Post from "./post.entity.js";
-import User from "../../users/entities/user.entity.js";
+import Post from './post.entity.js';
+import User from '../../users/entities/user.entity.js';
 
 @Entity('post_likes')
 export default class PostLike {
