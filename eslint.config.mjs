@@ -8,13 +8,19 @@ export default defineConfig([
         ignores: ['dist/**'],
     },
     {
-        files: ['**/*.{ts}'],
+        files: ['src/**/*.ts'],
         extends: [js.configs.recommended, tseslint.configs.recommended],
         languageOptions: {
             globals: globals.node,
         },
         rules: {
-            indent: ['error', 4],
+            indent: [
+                'error',
+                4,
+                {
+                    ignoredNodes: ['PropertyDefinition'],
+                },
+            ],
             'linebreak-style': ['error', 'unix'],
             quotes: ['error', 'single'],
             semi: ['error', 'always'],

@@ -5,11 +5,21 @@
         "moduleResolution": "nodenext",
         "strict": true,
         "outDir": "dist",
-        "rootDir": ".",
-        "allowJs": false,
+        "rootDir": "src",
         "esModuleInterop": true,
-        "skipLibCheck": true
+        "skipLibCheck": true,
+        "resolvePackageJsonExports": true,
+        "isolatedModules": true,
+        "declaration": true,
+        "removeComments": true,
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "sourceMap": true,
+        "incremental": true,
+        "forceConsistentCasingInFileNames": true,
+        "types": ["node"],
+        "strictPropertyInitialization": false
     },
-    "include": ["./**/*.ts", "./**/*.d.ts"],
+    "include": ["src/**/*.ts", "src/**/*.d.ts"],
     "exclude": ["node_modules", "dist"]
 }
