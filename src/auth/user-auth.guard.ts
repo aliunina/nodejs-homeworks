@@ -1,6 +1,5 @@
 import {
     Injectable,
-    InternalServerErrorException,
     UnauthorizedException,
     type CanActivate,
     type ExecutionContext,
@@ -22,13 +21,6 @@ export class UserAuthGuard implements CanActivate {
             }
 
             const secret = this.configService.getOrThrow<string>('JWT_SECRET');
-
-            if (!secret) {
-                throw new InternalServerErrorException(
-                    'JWT secret is not configured'
-                );
-            }
-
             const decodedToken = jwt.verify(token, secret) as JwtPayload;
 
             if (!decodedToken.id || typeof decodedToken.id !== 'string') {

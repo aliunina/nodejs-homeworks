@@ -22,6 +22,7 @@ import { UsersService } from '../users/users.service.js';
 import type PostEntity from './entities/post.entity.js';
 import { UserAuthGuard } from '../auth/user-auth.guard.js';
 import PostListQueryDto from './dtos/post-list-query.dto.js';
+import { HasUpdateGuard } from '../common/has-update.guard.js';
 
 @Controller('posts')
 @UseGuards(UserAuthGuard)
@@ -45,6 +46,7 @@ export class PostsController {
     }
 
     @Patch(':id')
+    @UseGuards(HasUpdateGuard)
     async updatePost(
         @Param('id') postId: string,
         @Body() body: UpdatePostDto,

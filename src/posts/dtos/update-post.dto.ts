@@ -5,11 +5,11 @@ export class UpdatePostDto {
     @MinLength(1)
     @MaxLength(254)
     @IsOptional()
-    title: string;
+    title?: string;
 
     @IsString()
     @MinLength(1)
     @MaxLength(5000)
     @IsOptional()
-    description: string;
+    description?: string;
 }

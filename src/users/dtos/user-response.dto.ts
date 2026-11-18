@@ -7,7 +7,9 @@ export class UserResponseDto {
     email: string;
 }
 
-export function toUserResponseDto(user: User): UserResponseDto {
+export function toUserResponseDto(
+    user: Pick<User, 'id' | 'firstName' | 'lastName' | 'email'>
+): UserResponseDto {
     return {
         id: user.id,
         firstName: user.firstName,

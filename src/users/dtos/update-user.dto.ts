@@ -9,7 +9,7 @@ export class UpdateUserDto {
         typeof value === 'string' ? value.trim() : value
     )
     @IsOptional()
-    firstName: string;
+    firstName?: string;
 
     @IsString()
     @MinLength(1)
@@ -18,5 +18,5 @@ export class UpdateUserDto {
         typeof value === 'string' ? value.trim() : value
     )
     @IsOptional()
-    lastName: string;
+    lastName?: string;
 }

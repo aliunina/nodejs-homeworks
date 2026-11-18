@@ -66,6 +66,7 @@ export class UsersService {
             throw new NotFoundException('User not found');
         }
 
+        // Email is best-effort: the listener logs failures and does not affect this response.
         this.eventEmitter.emit('profileUpdated', updatedUser);
 
         return updatedUser;

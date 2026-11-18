@@ -17,6 +17,7 @@ import type { AuthenticatedRequest } from '../types/express.js';
 import { toUserResponseDto } from './dtos/user-response.dto.js';
 import { UserAuthGuard } from '../auth/user-auth.guard.js';
 import UserListQueryDto from './dtos/user-list-query.dto.js';
+import { HasUpdateGuard } from '../common/has-update.guard.js';
 
 @Controller('users')
 export class UsersController {
@@ -47,7 +48,7 @@ export class UsersController {
     }
 
     @Patch('me')
-    @UseGuards(UserAuthGuard)
+    @UseGuards(UserAuthGuard, HasUpdateGuard)
     async updateCurrentUser(
         @Body() body: UpdateUserDto,
         @Req() req: AuthenticatedRequest
